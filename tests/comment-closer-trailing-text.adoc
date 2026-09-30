@@ -1,0 +1,6 @@
+////
+hidden
+//// not closer
+still hidden
+////
+visible

@@ -1,0 +1,8 @@
+//////
+hidden
+////
+still hidden
+///////
+still hidden
+//////
+visible
