@@ -52,6 +52,109 @@ in_basic_block {
 }
 
 
+function pad(s, c, n,   r) {
+	r = s ""
+	n = n - length(s)
+	while (n-- > 0) r = r c
+	return r
+}
+
+function parse_tabel(data, items_list, x_cel_size,    i, j) {
+	sub(/^[ ]*\|/, "", data)
+	item_count = split(data, items_list, "|")
+	# clean
+	for (i=1;i<=item_count;i++) {
+		sub(/^[[:space:]]+/, "", items_list[i])
+		sub(/[[:space:]]+$/, "", items_list[i])
+	}
+		
+	table_column_count = split(table_first_line, tamp, "|")
+	table_row_count = int(item_count/table_column_count)
+
+	delete x_cel_size
+	for (i=1;i<=table_row_count * table_column_count;i++) {
+		j = i%table_column_count
+		j = j == 0 ? table_column_count : j
+		if (x_cel_size[j] > length(items_list[i])) {}
+		else x_cel_size[j] = length(items_list[i])
+	}
+}
+
+function table_dump(data,    i, j) {
+	sub(/^[ ]*\|/, "", table_first_line)
+	parse_tabel(data, items_list, x_cel_len)
+
+
+	# print the top border
+	i=1
+	printf("┌%s", pad("", "─", x_cel_len[i])) 
+	while (i++<table_column_count) 
+		printf("┬%s", pad("", "─", x_cel_len[i])) 
+	printf("┐\n") 
+	
+	# print the top cels
+	i=0
+	printf("│") 
+	while (i++<table_column_count) 
+		printf("%s│", pad(items_list[i], " ", x_cel_len[i])) 
+	printf("\n")
+
+	j = 1
+
+	while(j<table_row_count) {
+		i=1
+		printf("├%s", pad("", "─", x_cel_len[i])) 
+		while (i++<table_column_count) 
+			printf("┼%s", pad("", "─", x_cel_len[i])) 
+		printf("┤\n") 
+
+		i=0
+		printf("│") 
+		while (i++<table_column_count) 
+			printf("%s│", 
+				pad(items_list[j * table_column_count + i], " ", 
+					x_cel_len [i])) 
+		printf("\n")
+		j++
+	}
+	
+	# print the botom
+	i=1
+	printf("└%s", pad("", "─", x_cel_len[i])) 
+	while (i++<table_column_count) 
+		printf("┴%s", pad("", "─", x_cel_len[i])) 
+	printf("┘\n") 
+}
+
+
+in_table {
+	if (table_termin == $0) {
+		in_table = 0
+		if (tabel_items != "") table_dump(tabel_items)
+		next
+	}
+	if (length(table_first_line) == 0)
+		table_first_line = $0
+	tabel_items = tabel_items " " $0
+	next
+}
+
+
+/^\|={3,}[[:space:]]*$/ {
+	in_table = 1
+	table_first_line=""
+	table_termin = $1
+	tabel_items = ""
+	next
+}
+
+
+
+
+
+
+
+
 # block detections
 # each line is a regex and a type assignment
 # the assignment only runs when the regex is matched
@@ -70,6 +173,9 @@ in_basic_block {
 	block_index=0
 	next
 }
+
+
+
 
 # this is comment
 /^\/\/[^\/]/ { next }
