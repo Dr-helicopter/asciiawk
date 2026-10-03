@@ -1,0 +1,7 @@
+before
+[%header]
+|===
+|a |b
+|c |d
+|===
+after
