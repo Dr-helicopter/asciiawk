@@ -1,0 +1,6 @@
+[%header]
+[%autowidth]
+|===
+|a |b
+|c |d
+|===

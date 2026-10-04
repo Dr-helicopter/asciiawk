@@ -5,8 +5,9 @@ function pad(s, c, n,   r) {
 	return r
 }
 
-
 function delimeter_bock_dump(lines, len, width, style, end_style,    i) {
+	block_attribute_list = ""
+
 	width++
 	printf("%s %-*s%s\n", style, width," ", end_style)
 
@@ -14,7 +15,11 @@ function delimeter_bock_dump(lines, len, width, style, end_style,    i) {
 		printf("%s %-*s%s\n", style, 
 		   width,lines[i], end_style)
 	printf("%s %-*s%s\n", style, width," ", end_style)
+
+	delete attributes
+	delete opts_attributes
 }
+
 
 BEGIN {
 	style_none    ="\033[0m"
@@ -62,75 +67,6 @@ in_basic_block {
 
 
 
-function parse_tabel_block_atrributes(    i, c, in_val, in_string, string_term, key) {
-	delete  attributes
-	key=""
-	val=""
-	in_val = 0 
-	in_string = 0
-	for(i=1;i<length(block_attribute_list);i++) {
-		c = substr(block_attribute_list,i,1)
-
-		if (in_string == 3) {
-			# we are not in a quoted string 
-			# we read untill we hit a comma
-			if (c == ",") {
-				attributes[key] = val
-				in_string = 0
-				in_val = 0
-				key = ""
-				val = ""
-			}
-			else 
-			val = val c
-		} 
-
-		else if (in_string == 2 && c == ",") { 
-			# we have finished reading 
-			# and are waiting for the next attribute
-			attributes[key] = val
-			in_string = 0
-			in_val = 0
-			key = ""
-			val = ""
-		} 
-
-		else if (in_string == 1) {
-			# we are reading a string
-			if (c == string_term)
-				in_string = 2
-			else val = val c
-		} 
-
-		else if (in_val) {
-			# we are not in a string but we are reading a val
-			if (c == "\"" || c == "'") {
-				in_string = 1
-				string_term = c
-			} else if ( c ~ /[[:space:]]/) {
-			} else {
-				val = val c
-				in_string = 3
-			}
-		}
-		
-		else {
-			if (c == "=") {
-				in_val = 1
-			} else if (c == ","){
-				key = ""
-			} else {
-				key = key c
-			}
-
-		}
-	}
-	attributes[key] = val
-}
-
-
-
-
 function parse_tabel(data, items_list, x_cel_size,    i, j) {
 	sub(/^[ ]*\|/, "", data)
 	item_count = split(data, items_list, "|")
@@ -166,14 +102,103 @@ function row_draw(row,    i, s) {
 	return s "\n"
 }
 
-function table_dump(data,    i, j) {
+function replace(str, pat, with,    i, l) {
+	l = length(pat) < length(with) ? length(pat) : length(with)
+	for (i=1;i<=l;i++)
+		gsub(substr(pat,i,1), substr(with,i,1), str)
+	return str
+}
+
+
+function trim(s) {
+	sub(/^[[:space:]]+/, "", s)
+	sub(/[[:space:]]+$/, "", s)
+	return s
+}
+
+function set_attribute(key, val,    tmp, i, c) {
+	key = trim(key)
+	val = trim(val)
+	if (key == "") return
+
+	if (key == "options" || key == "opts") {
+		c = split(val, tmp, / *, */)
+		for (i=1;i<=c;i++)
+			if (tmp[i] != "") opts_attributes[tmp[i]] = 1
+	} else
+		attributes[key] = val
+}
+
+
+function parse_tabel_block_atrributes(    i, c, in_val, in_string, string_term, key) {
+	key=""
+	val=""
+	in_val = 0 
+	in_string = 0
+	for(i=1;i<=length(block_attribute_list);i++) {
+		c = substr(block_attribute_list,i,1)
+
+		if (in_string == 3) {
+			# we are not in a quoted string 
+			# we read untill we hit a comma
+			if (c == ",") {
+				set_attribute(key, val)
+				in_string = 0
+				in_val = 0
+				key = ""
+				val = ""
+			}
+			else 
+			val = val c
+		} 
+
+		else if (in_string == 2 && c == ",") { 
+			# we have finished reading 
+			# and are waiting for the next attribute
+			set_attribute(key, val)
+			in_string = 0
+			in_val = 0
+			key = ""
+			val = ""
+		} 
+
+		else if (in_string == 1) {
+			# we are reading a string
+			if (c == string_term)
+				in_string = 2
+			else val = val c
+		} 
+
+		else if (in_val) {
+			# we are not in a string but we are reading a val
+			if (c == "\"" || c == "'") {
+				in_string = 1
+				string_term = c
+			} else if ( c ~ /[[:space:]]/) {
+			} else {
+				val = val c
+				in_string = 3
+			}
+		}
+		
+		else {
+			if (c == "=") {
+				in_val = 1
+			} else if (c == ","){
+				key = ""
+			} else {
+				key = key c
+			}
+
+		}
+	}	
+	set_attribute(key, val)
+}
+
+function render_table(data,    i, j) {
 	delete tabel_lines
 	sub(/^[ ]*\|/, "", table_first_line)
 	parse_tabel(data, items_list, x_cel_len)
-
-	parse_tabel_block_atrributes()
-	block_attribute_list = ""
-
 	# construct the top border
 	tabel_lines[0] = boarder_draw("┌", "┬", "┐")
 
@@ -189,27 +214,33 @@ function table_dump(data,    i, j) {
 	# construct the botom
 	tabel_lines[i*2] = boarder_draw("└", "┴", "┘")
 
+
 	# resking the table
-	if (attributes["options"] ~ /header/ ||
-	attributes["opts"] ~ /header/) { 
-		gsub("├", "╞", tabel_lines[2])
-		gsub("┼", "╪", tabel_lines[2])
-		gsub("┤", "╡", tabel_lines[2])
-		gsub("─", "═", tabel_lines[2])
+	if (opts_attributes["header"]) {
+		tabel_lines[0] = replace(tabel_lines[0], "┌┬┐─","╒╤╕═")
+		tabel_lines[2] = replace(tabel_lines[2], "├┼┤─└┴┘","╞╪╡═╘╧╛")
 	}
 
-	for (j=0;j<=i*2;j++) {
+	for (j=0;j<=i*2;j++)
 		printf("%s", tabel_lines[j])
-	}
-
-	delete attributes
 }
 
+function dump_table() {
+	in_table = 0
+
+	parse_tabel_block_atrributes()
+	block_attribute_list = ""
+
+	sub(/ *$/,"",tabel_items)
+	if (tabel_items != "") render_table(tabel_items)
+
+	delete attributes
+	delete opts_attributes
+}
 
 in_table {
 	if (table_termin == $0) {
-		in_table = 0
-		if (tabel_items != "") table_dump(tabel_items)
+		dump_table()
 		next
 	}
 	if (length(table_first_line) == 0)
@@ -322,7 +353,7 @@ END {
 		else delimeter_bock_dump(block_lines, block_index, 
 			block_max_len, style[basic_block_type], style_none)
 	if (in_table)
-		table_dump(tabel_items)
+		dump_table()
 
 	printf(style_none) # to make sure the style wont bleed out
 }

@@ -1,0 +1,5 @@
+[options="extra, header"]
+|===
+|a |b
+|c |d
+|===
