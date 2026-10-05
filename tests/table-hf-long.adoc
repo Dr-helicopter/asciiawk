@@ -1,0 +1,6 @@
+[options="header,footer"]
+|===
+|a
+|b
+|c
+|===

@@ -1,0 +1,5 @@
+[%noheader%footer]
+|===
+|a |b
+|c |d
+|===

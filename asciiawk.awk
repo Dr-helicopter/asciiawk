@@ -1,3 +1,4 @@
+#!/usr/bin/env -S awk -f
 function pad(s, c, n,   r) {
 	r = s ""
 	n = n - length(s)
@@ -214,11 +215,18 @@ function render_table(data,    i, j) {
 	# construct the botom
 	tabel_lines[i*2] = boarder_draw("└", "┴", "┘")
 
+	if (!opts_attributes["noheader"] && tabel_has_empty_seccond_line)
+		opts_attributes["header"] = 1
 
-	# resking the table
+	# restyling the table
 	if (opts_attributes["header"]) {
 		tabel_lines[0] = replace(tabel_lines[0], "┌┬┐─","╒╤╕═")
 		tabel_lines[2] = replace(tabel_lines[2], "├┼┤─└┴┘","╞╪╡═╘╧╛")
+	}
+
+	if (opts_attributes["footer"]) {
+		tabel_lines[i*2] = replace(tabel_lines[i*2], "└┴┘─","╘╧╛═")
+		tabel_lines[i*2-2] = replace(tabel_lines[i*2-2], "├┼┤─┌┬┐","╞╪╡═╒╤╕")
 	}
 
 	for (j=0;j<=i*2;j++)
@@ -243,8 +251,14 @@ in_table {
 		dump_table()
 		next
 	}
+
 	if (length(table_first_line) == 0)
 		table_first_line = $0
+	else if (!tabel_read_seccond_line) {
+		tabel_has_empty_seccond_line = length($0) == 0
+		tabel_read_seccond_line = 1
+	}
+
 	tabel_items = tabel_items " " $0
 	next
 }
@@ -255,6 +269,8 @@ in_table {
 	table_first_line=""
 	table_termin = $1
 	tabel_items = ""
+	tabel_has_empty_seccond_line = 0
+	tabel_read_seccond_line = 0
 	next
 }
 

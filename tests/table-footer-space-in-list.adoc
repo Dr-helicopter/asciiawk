@@ -1,0 +1,5 @@
+[options="footer, extra"]
+|===
+|a |b
+|c |d
+|===

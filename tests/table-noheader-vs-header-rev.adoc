@@ -1,0 +1,6 @@
+[%noheader]
+[%header]
+|===
+|a |b
+|c |d
+|===
