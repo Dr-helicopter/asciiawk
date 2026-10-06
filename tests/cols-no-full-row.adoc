@@ -1,0 +1,6 @@
+before
+[cols="3*"]
+|===
+|a |b
+|===
+after

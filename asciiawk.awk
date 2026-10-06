@@ -21,6 +21,26 @@ function delimeter_bock_dump(lines, len, width, style, end_style,    i) {
 	delete opts_attributes
 }
 
+function trim(s) {
+	sub(/^[[:space:]]+/, "", s)
+	sub(/[[:space:]]+$/, "", s)
+	return s
+}
+
+function boarder_draw(start, mid, end,    i, s) {
+	s = start pad("", "─", x_cel_len[1])
+	for (i=2;i<=table_column_count;i++)
+		s = s mid pad("", "─", x_cel_len[i])
+	return s end "\n"
+}
+
+function row_draw(row,    i, s) {
+	s = "│"
+	for (i=1;i<=table_column_count;i++)
+	s = s pad(items_list[row * table_column_count + i], " ", x_cel_len [i]) "│"
+	return s "\n"
+}
+
 
 BEGIN {
 	style_none    ="\033[0m"
@@ -77,7 +97,10 @@ function parse_tabel(data, items_list, x_cel_size,    i, j) {
 		sub(/[[:space:]]+$/, "", items_list[i])
 	}
 		
-	table_column_count = split(table_first_line, tamp, "|")
+	if (!table_column_count) {
+		sub(/^[ ]*\|/, "", table_first_line) # we dont need the first pipe
+		table_column_count = split(table_first_line, tamp, "|")
+	}
 	table_row_count = int(item_count/table_column_count)
 
 	delete x_cel_size
@@ -89,32 +112,11 @@ function parse_tabel(data, items_list, x_cel_size,    i, j) {
 	}
 }
 
-function boarder_draw(start, mid, end,    i, s) {
-	s = start pad("", "─", x_cel_len[1])
-	for (i=2;i<=table_column_count;i++)
-		s = s mid pad("", "─", x_cel_len[i])
-	return s end "\n"
-}
-
-function row_draw(row,    i, s) {
-	s = "│"
-	for (i=1;i<=table_column_count;i++)
-	s = s pad(items_list[row * table_column_count + i], " ", x_cel_len [i]) "│"
-	return s "\n"
-}
-
 function replace(str, pat, with,    i, l) {
 	l = length(pat) < length(with) ? length(pat) : length(with)
 	for (i=1;i<=l;i++)
 		gsub(substr(pat,i,1), substr(with,i,1), str)
 	return str
-}
-
-
-function trim(s) {
-	sub(/^[[:space:]]+/, "", s)
-	sub(/[[:space:]]+$/, "", s)
-	return s
 }
 
 function set_attribute(key, val,    tmp, i, c) {
@@ -129,7 +131,6 @@ function set_attribute(key, val,    tmp, i, c) {
 	} else
 		attributes[key] = val
 }
-
 
 function parse_tabel_block_atrributes(    i, c, in_val, in_string, string_term, key) {
 	key=""
@@ -196,10 +197,20 @@ function parse_tabel_block_atrributes(    i, c, in_val, in_string, string_term, 
 	set_attribute(key, val)
 }
 
-function render_table(data,    i, j) {
-	delete tabel_lines
-	sub(/^[ ]*\|/, "", table_first_line)
+function render_table(data,    i, j, cols_attibutes, cols_attibute_count) {
+	if ("cols" in attributes) {
+		cols_attibute_count = split(attributes["cols"], cols_attibutes, ",")
+		if (cols_attibute_count == 1)
+			table_column_count = int(attributes["cols"])
+		else
+			table_column_count = cols_attibute_count
+	}
+
 	parse_tabel(data, items_list, x_cel_len)
+
+	if (table_row_count == 0) return
+
+
 	# construct the top border
 	tabel_lines[0] = boarder_draw("┌", "┬", "┐")
 
@@ -240,8 +251,11 @@ function dump_table() {
 	block_attribute_list = ""
 
 	sub(/ *$/,"",tabel_items)
+
 	if (tabel_items != "") render_table(tabel_items)
 
+	table_column_count = 0
+	delete tabel_lines
 	delete attributes
 	delete opts_attributes
 }
@@ -362,7 +376,6 @@ in_table {
 { print }
 
 END {
-
 	# to make sure unterminated blocks still get printed
 	if (in_basic_block)
 		if (basic_block_type == "comment") { }

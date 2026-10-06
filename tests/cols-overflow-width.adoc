@@ -1,0 +1,6 @@
+[cols="2*"]
+|===
+|a |b
+|c |d
+|wide overflow
+|===
