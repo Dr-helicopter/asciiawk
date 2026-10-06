@@ -34,10 +34,13 @@ function boarder_draw(start, mid, end,    i, s) {
 	return s end "\n"
 }
 
-function row_draw(row,    i, s) {
+function row_draw(row,    txt, j, i, s) {
 	s = "│"
-	for (i=1;i<=table_column_count;i++)
-	s = s pad(items_list[row * table_column_count + i], " ", x_cel_len [i]) "│"
+	for (i=1;i<=table_column_count;i++) {
+		j = row * table_column_count + i
+		txt = pad(items_list[j], " ", x_cel_len [i])
+		s = s table_cel_styles[j] txt style_none "│"
+	}
 	return s "\n"
 }
 
@@ -61,6 +64,17 @@ BEGIN {
 	style["quote"]   = style_quote
 	style["example"] = style_example
 	style["sidebar"] = style_sidebar
+
+	
+	cel_spec_styles[""] = ""
+	cel_spec_styles["a"] = ""
+	cel_spec_styles["e"] = "\033[3m"
+	cel_spec_styles["h"] = "\033[1m"
+	cel_spec_styles["l"] = ""
+	cel_spec_styles["s"] = "\033[1m"
+	cel_spec_styles["v"] = ""
+	cel_spec_styles["m"] = ""
+	cel_spec_styles["d"] = ""
 }
 
 { # line cleanups
@@ -88,20 +102,48 @@ in_basic_block {
 
 
 
-function parse_tabel(data, items_list, x_cel_size,    i, j) {
-	sub(/^[ ]*\|/, "", data)
-	item_count = split(data, items_list, "|")
-	# clean
+function parse_tabel(data, items_list, x_cel_size, empty_space_before_c1,
+					next_styling_spec, spec, tmp, i, j) {
+	item_count = split(data, tmp, "|")
+
+	# parse_cells
+	j=1
 	for (i=1;i<=item_count;i++) {
-		sub(/^[[:space:]]+/, "", items_list[i])
-		sub(/[[:space:]]+$/, "", items_list[i])
+
+		if (tmp[i] ~ /[ ][adehlmsv]$/ && 
+			i != item_count)
+			# edge case, we have no nxt_style when we are at the last pipe
+
+			{ # we have a cell spec at hand
+			if (tmp[i] ~ /[adehlmsv]$/) { # we have styling spec
+				nxt_style_spec = substr(tmp[i], length(tmp[i]), 1)
+				tmp[i] = substr(tmp[i], 1,length(tmp[i])-1)
+			} 
+		}
+
+		# edge case, if we have a spec before the first pipe
+		# and not a first cel without a pipe
+		if (i==1 && tmp[i] ~ /^[[:space:]]*$/) {
+			j--
+			empty_space_before_c1 = 1
+		}
+
+
+		items_list[j] = tmp[i]
+		sub(/^[[:space:]]+/, "", items_list[j]) # strip trailing space
+		sub(/[[:space:]]+$/, "", items_list[j])
+		j++
+		table_cel_styles[j] = cel_spec_styles[nxt_style_spec]
+		nxt_style_spec = "" 
 	}
 		
 	if (!table_column_count) {
-		sub(/^[ ]*\|/, "", table_first_line) # we dont need the first pipe
-		table_column_count = split(table_first_line, tamp, "|")
+		table_column_count = \
+			split(table_first_line, tamp, "|") - empty_space_before_c1
 	}
-	table_row_count = int(item_count/table_column_count)
+	
+	# --j is the number of cels we counted earlier
+	table_row_count = int(--j/table_column_count)
 
 	delete x_cel_size
 	for (i=1;i<=table_row_count * table_column_count;i++) {
