@@ -1,8 +1,19 @@
 #!/usr/bin/env -S awk -f
-function pad(s, c, n,   r) {
+function pad(s, c, n, align, r) {
 	r = s ""
 	n = n - length(s)
-	while (n-- > 0) r = r c
+	if (align == "r") while(n-->0) r = c r
+	else if (align == "c") 	{
+		if (n%2) {
+			r = r c
+			n--
+		}
+		while(n>0) {
+			r = c r c
+			n-=2
+		}
+	}
+	else while(n-->0) r = r c 
 	return r
 }
 
@@ -38,7 +49,8 @@ function row_draw(row,    txt, j, i, s) {
 	s = "│"
 	for (i=1;i<=table_column_count;i++) {
 		j = row * table_column_count + i
-		txt = pad(items_list[j], " ", x_cel_len [i])
+		txt = pad(items_list[j], " ", x_cel_len[i],
+			cel_halign[table_cel_halign[j]])
 		s = s table_cel_styles[j] txt style_none "│"
 	}
 	return s "\n"
@@ -75,6 +87,10 @@ BEGIN {
 	cel_spec_styles["v"] = ""
 	cel_spec_styles["m"] = ""
 	cel_spec_styles["d"] = ""
+
+	cel_halign["<"] = "l"
+	cel_halign["^"] = "c"
+	cel_halign[">"] = "r"
 }
 
 { # line cleanups
@@ -103,26 +119,33 @@ in_basic_block {
 
 
 function parse_tabel(data, items_list, x_cel_size, empty_space_before_c1,
-					next_styling_spec, spec, tmp, i, j) {
+					nxt_cel_style, spec, tmp, i, j) {
 	item_count = split(data, tmp, "|")
 
+	delete table_cel_styles
 	# parse_cells
 	j=1
 	for (i=1;i<=item_count;i++) {
-
-		if (tmp[i] ~ /[ ][adehlmsv]$/ && 
+		if (tmp[i] ~ /[ ][<^>]?(\.[<^>])?[adehlmsv]?$/ && 
 			i != item_count)
 			# edge case, we have no nxt_style when we are at the last pipe
 
 			{ # we have a cell spec at hand
-			if (tmp[i] ~ /[adehlmsv]$/) { # we have styling spec
-				nxt_style_spec = substr(tmp[i], length(tmp[i]), 1)
+			if 	(tmp[i] ~ /[adehlmsv]$/) { # we have styling spec
+				nxt_cel_style= substr(tmp[i], length(tmp[i]), 1)
 				tmp[i] = substr(tmp[i], 1,length(tmp[i])-1)
-			} 
+			} if(tmp[i] ~ /(\.[<^>])$/) {
+				# tmporarily ignored
+				nxt_cel_valign = substr(tmp[i], length(tmp[i]), 1)
+				tmp[i] = substr(tmp[i], 1,length(tmp[i])-2)
+			} if(tmp[i] ~ /[<^>]$/) {
+				nxt_cel_halign = substr(tmp[i], length(tmp[i]), 1)
+				tmp[i] = substr(tmp[i], 1,length(tmp[i])-1)
+			}
 		}
 
 		# edge case, if we have a spec before the first pipe
-		# and not a first cel without a pipe
+		# and not a first cell without a pipe
 		if (i==1 && tmp[i] ~ /^[[:space:]]*$/) {
 			j--
 			empty_space_before_c1 = 1
@@ -133,16 +156,20 @@ function parse_tabel(data, items_list, x_cel_size, empty_space_before_c1,
 		sub(/^[[:space:]]+/, "", items_list[j]) # strip trailing space
 		sub(/[[:space:]]+$/, "", items_list[j])
 		j++
-		table_cel_styles[j] = cel_spec_styles[nxt_style_spec]
-		nxt_style_spec = "" 
+		table_cel_styles[j] = cel_spec_styles[nxt_cel_style]
+		table_cel_halign[j] = nxt_cel_halign
+		nxt_cel_style= "" 
+		nxt_cel_halign = "" 
 	}
 		
-	if (!table_column_count) {
+	
+	# if we havent gotten it from attributes we get it from the first line
+	if (!table_column_count)  		
 		table_column_count = \
 			split(table_first_line, tamp, "|") - empty_space_before_c1
-	}
+
 	
-	# --j is the number of cels we counted earlier
+	# --j is the number of cells we counted earlier
 	table_row_count = int(--j/table_column_count)
 
 	delete x_cel_size
@@ -256,7 +283,7 @@ function render_table(data,    i, j, cols_attibutes, cols_attibute_count) {
 	# construct the top border
 	tabel_lines[0] = boarder_draw("┌", "┬", "┐")
 
-	# construct the top cels
+	# construct the top cells
 	tabel_lines[1] = row_draw(0)
 
 

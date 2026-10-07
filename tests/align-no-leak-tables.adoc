@@ -1,0 +1,8 @@
+|===
+|wide cell |b
+>|r |c
+|===
+|===
+|wide cell |b
+|x |y
+|===

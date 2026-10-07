@@ -1,0 +1,7 @@
+
+.A07 style each
+|===
+a|ctx d|default e|emph h|head
+l|literal m|mono s|strong v|verse a
+|===
+
