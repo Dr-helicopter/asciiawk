@@ -38,6 +38,23 @@ function trim(s) {
 	return s
 }
 
+function first_line_slots(line,   s, n, spec, num) {
+	s = line
+	n = gsub(/\|/, "&", s)        # pipe count, s unchanged
+	s = line
+	while (match(s, /(^|[ ])([0-9]+(\.[0-9]+)?|\.[0-9]+)[+*][<^>]?(\.[<^>])?[adehlmsv]?\|/)) {
+		spec = substr(s, RSTART, RLENGTH)
+		sub(/^ /, "", spec)
+		if (spec !~ /^\./) {# ".3+" has no column part
+			num = int(spec) # int("2.3+") is 2, int("3*") is 3
+			if (num > 1) n += num - 1
+		}
+		s = substr(s, RSTART + RLENGTH - 1)# keep the pipe, resume after the spec
+	}
+	return n
+}
+
+
 function boarder_draw(start, mid, end,    i, s) {
 	s = start pad("", "─", x_cel_len[1])
 	for (i=2;i<=table_column_count;i++)
@@ -119,14 +136,17 @@ in_basic_block {
 
 
 function parse_tabel(data, items_list, x_cel_size, empty_space_before_c1,
-					nxt_cel_style, spec, tmp, i, j) {
+					nxt_cel_style, spec, tmp, i, j, k) {
 	item_count = split(data, tmp, "|")
 
 	delete table_cel_styles
+	delete table_cel_halign
 	# parse_cells
 	j=1
+	mul=1
+	nxt_cel_mul=1
 	for (i=1;i<=item_count;i++) {
-		if (tmp[i] ~ /[ ][<^>]?(\.[<^>])?[adehlmsv]?$/ && 
+		if (tmp[i] ~ /[ ]([0-9]+\*)?[<^>]?(\.[<^>])?[adehlmsv]?$/ && 
 			i != item_count)
 			# edge case, we have no nxt_style when we are at the last pipe
 
@@ -141,7 +161,11 @@ function parse_tabel(data, items_list, x_cel_size, empty_space_before_c1,
 			} if(tmp[i] ~ /[<^>]$/) {
 				nxt_cel_halign = substr(tmp[i], length(tmp[i]), 1)
 				tmp[i] = substr(tmp[i], 1,length(tmp[i])-1)
-			}
+			} if (tmp[i] ~ /[0-9]+\*$/) {
+				match(tmp[i], /[0-9]+\*$/)
+				nxt_cel_mul = int(substr(tmp[i], RSTART, RLENGTH-1))
+				tmp[i] = substr(tmp[i], 1, RSTART - 1)
+			} 
 		}
 
 		# edge case, if we have a spec before the first pipe
@@ -151,34 +175,44 @@ function parse_tabel(data, items_list, x_cel_size, empty_space_before_c1,
 			empty_space_before_c1 = 1
 		}
 
+		tmp[i] = trim(tmp[i])
+
 
 		items_list[j] = tmp[i]
-		sub(/^[[:space:]]+/, "", items_list[j]) # strip trailing space
-		sub(/[[:space:]]+$/, "", items_list[j])
 		j++
+		for (k=2;k<=mul;k++){
+			# if we gonna multiply the cells we have to give the specs of
+			# the cel we just passed to its multdelete x_cel_size
+			items_list[j] = tmp[i]
+			table_cel_styles[j] = table_cel_styles[j-1]
+			table_cel_halign[j] = table_cel_halign[j-1]
+			j++
+		}
 		table_cel_styles[j] = cel_spec_styles[nxt_cel_style]
 		table_cel_halign[j] = nxt_cel_halign
+
+		mul = nxt_cel_mul
+		nxt_cel_mul = 1
 		nxt_cel_style= "" 
-		nxt_cel_halign = "" 
-	}
-		
-	
+        nxt_cel_halign = "" 
+    }
+               
+       
 	# if we havent gotten it from attributes we get it from the first line
-	if (!table_column_count)  		
-		table_column_count = \
-			split(table_first_line, tamp, "|") - empty_space_before_c1
+    if (!table_column_count)          
+        table_column_count = first_line_slots(table_first_line)
 
-	
-	# --j is the number of cells we counted earlier
-	table_row_count = int(--j/table_column_count)
 
-	delete x_cel_size
-	for (i=1;i<=table_row_count * table_column_count;i++) {
-		j = i%table_column_count
-		j = j == 0 ? table_column_count : j
-		if (x_cel_size[j] > length(items_list[i])) {}
-		else x_cel_size[j] = length(items_list[i])
-	}
+    # --j is the number of cells we counted earlier
+    table_row_count = int(--j/table_column_count)
+
+    delete x_cel_size
+    for (i=1;i<=table_row_count * table_column_count;i++) {
+        j = i%table_column_count
+        j = j == 0 ? table_column_count : j
+        if (x_cel_size[j] > length(items_list[i])) {}
+        else x_cel_size[j] = length(items_list[i])
+    }
 }
 
 function replace(str, pat, with,    i, l) {
