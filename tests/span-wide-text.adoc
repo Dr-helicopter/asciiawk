@@ -1,0 +1,4 @@
+|===
+2+|a very long spanning cell |b
+|c |d |e
+|===
