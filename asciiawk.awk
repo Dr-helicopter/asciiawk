@@ -22,7 +22,7 @@ function replace(str, pat, with,    i, l) {
 	return str
 }
 
-# to does a Gsub but only on inner elements
+# to does a gsub but only on inner elements
 function inner_gsub(line, pat, with,   nl, first, last, body) {
 	nl = "\n"
 	line = substr(line, 1, length(line) - 1)
@@ -59,6 +59,22 @@ function is_string_at(arr, i,    t) {
 }
 # END of utility functions
 
+
+# helper function for setting a ablock attribute
+# the qouted arguments preserves spaces in *val*
+function set_attribute(key, val, quoted,    tmp, i, c) {
+	key = trim(key)
+	val = quoted ? val : trim(val)
+	if (key == "") return
+
+	if (key == "options" || key == "opts") {
+		c = split(val, tmp, / *, */)
+		for (i=1;i<=c;i++) {
+			tmp[i] = trim(tmp[i])
+			if (tmp[i] != "") opts_attributes[tmp[i]] = 1
+		}
+	} else attributes[key] = val
+}
 
 
 
@@ -112,9 +128,6 @@ function parse_cel_specs(str,    s) {
 	return s
 }
 
-
-
-
 function delimeted_bock_dump(lines, len, width, style, end_style,    i) {
 	block_attribute_list = ""
 
@@ -131,16 +144,17 @@ function delimeted_bock_dump(lines, len, width, style, end_style,    i) {
 }
 
 
+# helper function to func the implicit col count in tables
 function first_line_slots(line,   s, n, spec, num) {
 	s = line
-	n = gsub(/\|/, "&", s)        # pipe count, s unchanged
+	n = gsub(/\|/, "&", s) # pipe count, s unchanged
 	s = line
 	while (match(s, /(^|[ ])([0-9]+(\.[0-9]+)?|\.[0-9]+)[+*][<^>]?(\.[<^>])?[adehlmsv]?\|/))
 	{
 		spec = substr(s, RSTART, RLENGTH)
 		sub(/^ /, "", spec)
-		if (spec !~ /^\./) {# ".3+" has no column part
-			num = int(spec) # int("2.3+") is 2, int("3*") is 3
+		if (spec !~ /^\./) { # ".3+" has no column part
+			num = int(spec)  # int("2.3+") is 2, int("3*") is 3
 			if (num != 1) n += num - 1
 		}
 		s = substr(s, RSTART + RLENGTH - 1)# keep the pipe, resume after the spec
@@ -149,8 +163,7 @@ function first_line_slots(line,   s, n, spec, num) {
 }
 
 
-
-BEGIN {
+BEGIN { # mostly variable assignments
 	style_none    ="\033[0m"
 	style_literal ="\033[48;5;0m"
 	style_listing ="\033[48;5;0m"
@@ -215,78 +228,6 @@ in_basic_block {
 	next
 }
 
-
-function row_draw(row,    border, txt, j, i, s) {
-	s = ""
-	for (i=1;i<=table_column_count;i++) {
-		j = row * table_column_count + i
-		txt = pad(items_list[j], " ", table_cel_width[i],
-			cel_halign[table_cel_halign[j]])
-		border = table_cels_no_back_border[j] == 1 ? " " : "│"
-		s = s border table_cel_styles[j] txt style_none 	
-	}
-	return s "│\n"
-}
-
-function boarder_draw(start, mid, end, row,   i, s) {
-	j = row * table_column_count + 1
-	border = table_cels_no_up_border[j] == 1 ? " " : "─"
-
-	s = start pad("", border, table_cel_width[1])
-	for (i=2;i<=table_column_count;i++) {
-		j++
-		border = table_cels_no_up_border[j] == 1 ? " " : "─"
-		s = s mid pad("", border, table_cel_width[i])
-	}
-	return s end "\n"
-}
-
-
-function boarder_draw_top(     i, s, border, start) {
-	border = J["0011"]
-	s = J["0101"] pad("", border, table_cel_width[1])
-
-	for (i=2;i<=table_column_count;i++) {
-		start = table_cels_no_back_border[i] == 1 ? J["0011"] : J["0111"] 
-		s = s start pad("", border, table_cel_width[i])
-	}
-	return s J["0110"] "\n"
-}
-
-function boarder_draw_bottom(     i, j, s, border, start) {
-	border = J["0011"]
-	s = J["1001"] pad("", border, table_cel_width[1])
-
-	j = (table_row_count - 1) * table_column_count + 1
-	for (i=2;i<=table_column_count;i++) {
-		start = table_cels_no_back_border[++j] == 1 ? J["0011"] : J["1011"] 
-		s = s start pad("", border, table_cel_width[i])
-	}
-	return s J["1010"] "\n"
-}
-
-function boarder_draw_mid(row,     i, j, s, border, start) {
-	j = row * table_column_count + 1
-	border = table_cels_no_up_border[j] == 1 ? " " : "─"
-
-	s = J["1101"] pad("", border, table_cel_width[1])
-	for (i=2;i<=table_column_count;i++) {
-		j++
-		border = (table_cels_no_up_border[j] == 1) ? " " : "─"
-		if (table_cels_no_back_border[j] == 1) {
-			if (table_cels_no_back_border[j - table_column_count] == 1)
-				start =  J["0011"]
-			else start =  J["1011"]
-
-		} else {
-			if (table_cels_no_back_border[j - table_column_count] == 1)
-				start = J["0111"]
-			else start = J["1111"] 
-		}
-		s = s start pad("", border, table_cel_width[i])
-	}
-	return s J["1110"] "\n"
-}
 
 
 function parse_tabel(data, table_cels, x_cel_size,    tmp, i, j, k, w, v,
@@ -398,23 +339,6 @@ function parse_tabel(data, table_cels, x_cel_size,    tmp, i, j, k, w, v,
         	x_cel_size[j] = length(table_cels[i])
     }
 }
-
-function set_attribute(key, val, quoted,    tmp, i, c) {
-	key = trim(key)
-	val = quoted ? val : trim(val)
-	if (key == "") return
-
-	if (key == "options" || key == "opts") {
-		c = split(val, tmp, / *, */)
-		for (i=1;i<=c;i++) {
-			tmp[i] = trim(tmp[i])
-			if (tmp[i] != "") opts_attributes[tmp[i]] = 1
-
-		}
-	} else
-		attributes[key] = val
-}
-
 function parse_tabel_block_atrributes(    i, c, in_val, in_string, string_term, key) {
 	key=""
 	val=""
@@ -479,16 +403,69 @@ function parse_tabel_block_atrributes(    i, c, in_val, in_string, string_term, 
 			} else {
 				key = key c
 			}
-
 		}
 	}	
 	set_attribute(key, val)
 }
 
-# helper for frame=ends
-function frame_ends_style(s,    t) {
-	t = s
-	return t
+
+
+function row_draw(row,    border, txt, j, i, s) {
+	s = ""
+	for (i=1;i<=table_column_count;i++) {
+		j = row * table_column_count + i
+		txt = pad(items_list[j], " ", table_cel_width[i],
+			cel_halign[table_cel_halign[j]])
+		border = table_cels_no_back_border[j] == 1 ? " " : "│"
+		s = s border table_cel_styles[j] txt style_none 	
+	}
+	return s "│\n"
+}
+
+function boarder_draw_top(     i, s, border, start) {
+	border = J["0011"]
+	s = J["0101"] pad("", border, table_cel_width[1])
+
+	for (i=2;i<=table_column_count;i++) {
+		start = table_cels_no_back_border[i] == 1 ? J["0011"] : J["0111"] 
+		s = s start pad("", border, table_cel_width[i])
+	}
+	return s J["0110"] "\n"
+}
+
+function boarder_draw_bottom(     i, j, s, border, start) {
+	border = J["0011"]
+	s = J["1001"] pad("", border, table_cel_width[1])
+
+	j = (table_row_count - 1) * table_column_count + 1
+	for (i=2;i<=table_column_count;i++) {
+		start = table_cels_no_back_border[++j] == 1 ? J["0011"] : J["1011"] 
+		s = s start pad("", border, table_cel_width[i])
+	}
+	return s J["1010"] "\n"
+}
+
+function boarder_draw_mid(row,     i, j, s, border, start) {
+	j = row * table_column_count + 1
+	border = table_cels_no_up_border[j] == 1 ? " " : "─"
+
+	s = J["1101"] pad("", border, table_cel_width[1])
+	for (i=2;i<=table_column_count;i++) {
+		j++
+		border = (table_cels_no_up_border[j] == 1) ? " " : "─"
+		if (table_cels_no_back_border[j] == 1) {
+			if (table_cels_no_back_border[j - table_column_count] == 1)
+				start =  J["0011"]
+			else start =  J["1011"]
+
+		} else {
+			if (table_cels_no_back_border[j - table_column_count] == 1)
+				start = J["0111"]
+			else start = J["1111"] 
+		}
+		s = s start pad("", border, table_cel_width[i])
+	}
+	return s J["1110"] "\n"
 }
 
 function render_table(data,    i, j, cols_attibutes, cols_attibute_count, grid) {
