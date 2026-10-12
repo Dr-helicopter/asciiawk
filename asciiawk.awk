@@ -5,6 +5,8 @@
 # why are you reading this?
 
 
+# utility functions here VVVVV
+
 # returns the string with no whitespace on eather side
 function trim(s) {
 	sub(/^[[:space:]]+/, "", s)
@@ -18,6 +20,21 @@ function replace(str, pat, with,    i, l) {
 	l = length(pat) < length(with) ? length(pat) : length(with)
 	for (i=1;i<=l;i++) gsub(substr(pat,i,1), substr(with,i,1), str)
 	return str
+}
+
+# to does a Gsub but only on inner elements
+function inner_gsub(line, pat, with,   nl, first, last, body) {
+	nl = "\n"
+	line = substr(line, 1, length(line) - 1)
+
+	if (length(line) < 3) return line nl  # nothing "inner" to touch
+
+	first = substr(line, 1, 1)
+	last  = substr(line, length(line), 1)
+	body  = substr(line, 2, length(line) - 2)
+
+	gsub(pat, with, body)
+	return first body last nl
 }
 
 # pads the string s with character c to length n
@@ -40,6 +57,10 @@ function is_string_at(arr, i,    t) {
 	t = typeof(arr[i])
 	return (t == "string" || t == "strnum")
 }
+# END of utility functions
+
+
+
 
 # an ugly function that takes a raw cell declaration and parses the next cell's
 # specs and returns the cleaned cell contents
@@ -464,7 +485,13 @@ function parse_tabel_block_atrributes(    i, c, in_val, in_string, string_term, 
 	set_attribute(key, val)
 }
 
-function render_table(data,    i, j, cols_attibutes, cols_attibute_count) {
+# helper for frame=ends
+function frame_ends_style(s,    t) {
+	t = s
+	return t
+}
+
+function render_table(data,    i, j, cols_attibutes, cols_attibute_count, grid) {
 	if ("cols" in attributes) {
 		cols_attibute_count = split(attributes["cols"], cols_attibutes, ",")
 		if (cols_attibute_count == 1)
@@ -477,6 +504,10 @@ function render_table(data,    i, j, cols_attibutes, cols_attibute_count) {
 
 	if (table_row_count == 0) return
 
+	# determin_grid_type
+	if ("grid" in attributes) {
+		grid = "r"
+	} else grid = "a"
 
 	# construct the top border
 	tabel_lines[0] = boarder_draw_top()
@@ -486,7 +517,7 @@ function render_table(data,    i, j, cols_attibutes, cols_attibute_count) {
 
 	for (i=1;i<table_row_count;i++) {
 		tabel_lines[i*2] = boarder_draw_mid(i)
-		tabel_lines[i*2 +1 ] = row_draw(i)
+		tabel_lines[i*2 +1] = row_draw(i)
 	}
 	
 	# construct the botom
@@ -505,6 +536,44 @@ function render_table(data,    i, j, cols_attibutes, cols_attibute_count) {
 		gsub(/[ ]─/, "  ", tabel_lines[i*2])
 	}
 	
+
+	
+	if ("grid" in attributes && attributes["grid"] != "all") {
+		# we dont touch it if its grid==all
+		if (attributes["grid"] != "rows")
+			for (i=1;i<table_row_count;i++)
+				tabel_lines[i*2] = replace(tabel_lines[i*2], "┼─┴┬┤├","│ ││││")
+
+		if (attributes["grid"] != "cols") {
+			gsub("┬","─", tabel_lines[0])
+			for (i=0;i<table_row_count*2;i++) {
+				tabel_lines[i] = inner_gsub(tabel_lines[i], "│", " ")
+				tabel_lines[i] = inner_gsub(tabel_lines[i], "┤", "─")
+				tabel_lines[i] = inner_gsub(tabel_lines[i], "├", "─")
+				gsub(/┼/, "─", tabel_lines[i])
+			}
+			gsub("┴","─", tabel_lines[i])
+		}
+		# if grid == none or any undefined state we want to delete it all
+	}
+
+	# similar to whats happenning above
+	if ("frame" in attributes && attributes["frame"] != "all") {
+		if (attributes["frame"] != "ends") {
+			tabel_lines[0] = replace(tabel_lines[0], "┌┐┬─", "│││ ")
+			tabel_lines[table_row_count*2] = replace(tabel_lines[table_row_count*2], "└┘┴─", "│││ ")
+		} 
+
+		if (attributes["frame"] != "sides") { 
+			for (i=0;i<=table_row_count*2;i++) {
+				gsub(/^[│]/, " ", tabel_lines[i])
+				gsub(/^[├┌└]/, "─", tabel_lines[i])
+				gsub(/[│]\n/, " \n", tabel_lines[i])
+				gsub(/[┤┐┘]\n/, "─\n", tabel_lines[i])
+			}
+		}
+	}
+
 	# restyling the table
 	if (opts_attributes["header"]) {
 		tabel_lines[0] = replace(tabel_lines[0], "┌┬┐─","╒╤╕═")
@@ -512,11 +581,11 @@ function render_table(data,    i, j, cols_attibutes, cols_attibute_count) {
 	}
 
 	if (opts_attributes["footer"]) {
-		tabel_lines[i*2] = replace(tabel_lines[i*2], "└┴┘─","╘╧╛═")
-		tabel_lines[i*2-2] = replace(tabel_lines[i*2-2], "├┼┤─┌┬┐┴","╞╪╡═╒╤╕╧")
+		tabel_lines[table_row_count*2] = replace(tabel_lines[table_row_count*2], "└┴┘─","╘╧╛═")
+		tabel_lines[table_row_count*2-2]= replace(tabel_lines[table_row_count*2-2], "├┼┤─┌┬┐┴","╞╪╡═╒╤╕╧")
 	}
 
-	for (j=0;j<=i*2;j++)
+	for (j=0;j<=table_row_count*2;j++)
 		printf("%s", tabel_lines[j])
 }
 
@@ -537,6 +606,7 @@ function dump_table() {
 		
 		printf("%s\n",attributes["title"] style_none)
 	}
+
 	if (tabel_items != "") render_table(tabel_items)
 
 	table_column_count = 0
@@ -651,7 +721,7 @@ in_table {
 		for (i=2;i<=split(tmp, tmp_spilited, "%");i++) {
 			block_attribute_list = block_attribute_list tmp_spilited[i] ","
 		}
-		block_attribute_list = block_attribute_list "\""
+		block_attribute_list = block_attribute_list "\","
 		sub(/^%[^,]*,/, "")
 	}
 	block_attribute_list = block_attribute_list  $0 ","

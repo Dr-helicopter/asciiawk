@@ -1,0 +1,5 @@
+[%header,frame=sides]
+|===
+|a |b
+|c |d
+|===

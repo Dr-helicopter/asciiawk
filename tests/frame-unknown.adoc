@@ -1,0 +1,5 @@
+[frame=banana]
+|===
+|a |b
+|c |d
+|===

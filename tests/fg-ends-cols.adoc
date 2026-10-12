@@ -1,0 +1,5 @@
+[frame=ends,grid=cols]
+|===
+|a |b
+|c |d
+|===
