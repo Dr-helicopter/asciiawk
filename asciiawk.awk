@@ -138,9 +138,11 @@ BEGIN {
 	style_sidebar = "\033[38;5;14m\033[48;5;0m"
 	style_open    = style_listing
 
-	style_h1 = "\033[1;35m"   # magenta
+	style_h1 = "\033[1;35m"   # megenta
 	style_h2 = "\033[1;36m"   # cyan
-	style_h3 = "\033[1;33m"
+	style_h3 = "\033[1;33m"	  # yellow
+
+	style_ti = "\033[1;33m"
 
 	style["literal"] = style_literal
 	style["listing"] = style_listing
@@ -376,15 +378,18 @@ function parse_tabel(data, table_cels, x_cel_size,    tmp, i, j, k, w, v,
     }
 }
 
-function set_attribute(key, val,    tmp, i, c) {
+function set_attribute(key, val, quoted,    tmp, i, c) {
 	key = trim(key)
-	val = trim(val)
+	val = quoted ? val : trim(val)
 	if (key == "") return
 
 	if (key == "options" || key == "opts") {
 		c = split(val, tmp, / *, */)
-		for (i=1;i<=c;i++)
+		for (i=1;i<=c;i++) {
+			tmp[i] = trim(tmp[i])
 			if (tmp[i] != "") opts_attributes[tmp[i]] = 1
+
+		}
 	} else
 		attributes[key] = val
 }
@@ -397,7 +402,11 @@ function parse_tabel_block_atrributes(    i, c, in_val, in_string, string_term, 
 	for(i=1;i<=length(block_attribute_list);i++) {
 		c = substr(block_attribute_list,i,1)
 
-		if (in_string == 3) {
+		if (in_escape) {
+			val = val c
+			in_escape = 0
+		}
+		else if (in_string == 3) {
 			# we are not in a quoted string 
 			# we read untill we hit a comma
 			if (c == ",") {
@@ -414,16 +423,18 @@ function parse_tabel_block_atrributes(    i, c, in_val, in_string, string_term, 
 		else if (in_string == 2 && c == ",") { 
 			# we have finished reading 
 			# and are waiting for the next attribute
-			set_attribute(key, val)
+			set_attribute(key, val, 1)
 			in_string = 0
 			in_val = 0
 			key = ""
 			val = ""
+		} else if (in_string == 2){
+			# do nothing if string isnt ended
 		} 
-
 		else if (in_string == 1) {
 			# we are reading a string
-			if (c == string_term)
+			if (c == "\\") in_escape = 1
+			else if (c == string_term)
 				in_string = 2
 			else val = val c
 		} 
@@ -439,7 +450,6 @@ function parse_tabel_block_atrributes(    i, c, in_val, in_string, string_term, 
 				in_string = 3
 			}
 		}
-		
 		else {
 			if (c == "=") {
 				in_val = 1
@@ -518,6 +528,15 @@ function dump_table() {
 
 	sub(/ *$/,"",tabel_items)
 
+	if ("title" in attributes) {
+		printf("%s.", style_ti)
+		if ("caption" in attributes)
+			printf ("%s", attributes["caption"])
+		else 
+			printf ("Table %d. ", ++table_counter)
+		
+		printf("%s\n",attributes["title"] style_none)
+	}
 	if (tabel_items != "") render_table(tabel_items)
 
 	table_column_count = 0
@@ -638,6 +657,15 @@ in_table {
 	block_attribute_list = block_attribute_list  $0 ","
 	next
 }
+
+# title 
+/^\.{1,2}[^ \.].*/ {
+	$0 = substr($0,2)
+	gsub(/"/, "\\\"", $0)
+	block_attribute_list = block_attribute_list "title=\"" trim($0) "\","
+	next
+}
+
 
 { print }
 
