@@ -168,7 +168,7 @@ BEGIN { # mostly variable assignments
 	style_literal ="\033[48;5;0m"
 	style_listing ="\033[48;5;0m"
 	style_quote   = "\033[38;5;7m\033[48;5;0m"
-	style_example = "\033[38;5;11m\033[48;5;0m"
+	style_example = "\033[33;40m"
 	style_sidebar = "\033[38;5;14m\033[48;5;0m"
 	style_open    = style_listing
 
