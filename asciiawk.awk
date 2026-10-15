@@ -59,6 +59,58 @@ function is_string_at(arr, i,    t) {
 }
 # END of utility functions
 
+# helper function for dealing with the cols attribute
+function parse_table_cols(s,    n, i, j, mul, idx, tmp, tmp2) {
+	# we dont have a list to parse
+	if (s ~ /^[0-9]+\*?[[:space:]]*[^,]/) {
+		attributes["cols-count"] = int(s)
+		return
+	}
+	n = split(s, tmp, /[[:space:]]*,[[:space:]]*/)
+	
+	idx=1
+	for (i=1;i<=n;i++){
+		j = split(tmp[i], tmp2, /\*/)
+		# if we have a multiplier we want to repeat the next action
+		# times the multiplier and we want to do it on the seccond part of the 
+		# splited array, otherwise we only do it once
+		mul = 1
+		if (j > 1){
+			mul = int(tmp2[1])
+			tmp[i] = tmp2[2]
+		}
+
+		if (tmp[i] ~ /[adehlms]$/) {
+			table_col_style[idx] = substr(tmp[i], length(tmp[i]))
+			sub(/[adehlms]$/, "", tmp[i])
+		}
+		if (match(tmp[i], /[0-9]+$/)) {
+			table_col_width[idx] = substr(tmp[i], RSTART, RLENGTH)
+			sub(/[0-9]+$/, "", tmp[i])
+		}
+		if (tmp[i] ~ /\.[<^>]+$/) {
+			table_col_valign[idx] = substr(tmp[i], length(tmp[i]))
+			sub(/\.[<^>]+$/, "", tmp[i])
+		}
+
+		if (tmp[i] ~ /[<^>]+$/) {
+			table_col_halign[idx] = substr(tmp[i], length(tmp[i]))
+			sub(/[<^>]+$/, "", tmp[i])
+		}
+		idx++
+		
+		while (--mul) {
+			table_col_style[idx] = table_col_style[idx-1]
+			table_col_width[idx] = table_col_width[idx-1]
+			table_col_halign[idx] = table_col_halign[idx-1]
+			table_col_valign[idx] = table_col_valign[idx-1]
+			idx++
+		}
+	}
+
+	attributes["cols-count"] = idx - 1
+}
+
 
 # helper function for setting a ablock attribute
 # the qouted arguments preserves spaces in *val*
@@ -73,35 +125,26 @@ function set_attribute(key, val, quoted,    tmp, i, c) {
 			tmp[i] = trim(tmp[i])
 			if (tmp[i] != "") opts_attributes[tmp[i]] = 1
 		}
-		return
-	} 
-
-	if (key == "cols") {
-		if (val !~ /,/) {
-			attributes["col-count"] = int(val)
-			return
-		}
-
-		if (val !~ /\*/)
-		attributes["col-count"] = split(val, tmp, /[[:space:]]*,[[:space:]]*/)
-		return
-	}
-	attributes[key] = val
+	} else if (key == "cols") parse_table_cols(val)
+	else attributes[key] = val
 }
 
 
 
 # an ugly function that takes a raw cell declaration and parses the next cell's
 # specs and returns the cleaned cell contents
-function parse_cel_specs(str,    s) {
+function parse_cel_specs(str, idx,    s) {
 	s = str
 	delete nxt_cel_spec
+	idx = idx % table_column_count
+	idx = idx == 0 ? table_column_count : idx
+
 	nxt_cel_spec["mul"] = 1
 	nxt_cel_spec["hspan"] = 1
 	nxt_cel_spec["vspan"] = 1
-	nxt_cel_spec["style"] = ""
-	nxt_cel_spec["halign"] = ""
-	nxt_cel_spec["valign"] = ""
+	nxt_cel_spec["style"] = table_col_style[idx]
+	nxt_cel_spec["halign"] = table_col_halign[idx]
+	nxt_cel_spec["valign"] = table_col_valign[idx]
 	
 	# if we dont match this regex, we certainly dont have a spec
 	if (s !~ /[ ](([0-9]*\.?[0-9]+\+)|([0-9]+\*))?[<^>]?(\.[<^>])?[adehlmsv]?$/)
@@ -274,17 +317,17 @@ function render_table(data,    i, j, cols_attibutes, cols_attibute_count, grid) 
 	if (table_row_count == 0) return
 
 	# construct a basic table
-	tabel_lines[0] = boarder_draw_top()
-	tabel_lines[1] = row_draw(0)
+	table_lines[0] = boarder_draw_top()
+	table_lines[1] = row_draw(0)
 	for (i=1;i<table_row_count;i++) {
-		tabel_lines[i*2] = boarder_draw_mid(i)
-		tabel_lines[i*2 +1] = row_draw(i)
+		table_lines[i*2] = boarder_draw_mid(i)
+		table_lines[i*2 +1] = row_draw(i)
 	}
-	tabel_lines[i*2] = boarder_draw_bottom()
+	table_lines[i*2] = boarder_draw_bottom()
 
 
 
-	if (!opts_attributes["noheader"] && tabel_has_empty_seccond_line)
+	if (!opts_attributes["noheader"] && table_has_empty_seccond_line)
 		opts_attributes["header"] = 1
 
 
@@ -293,16 +336,16 @@ function render_table(data,    i, j, cols_attibutes, cols_attibute_count, grid) 
 		# we dont touch it if its grid==all
 		if (attributes["grid"] != "rows")
 			for (i=1;i<table_row_count;i++)
-				tabel_lines[i*2] = replace(tabel_lines[i*2], "┼─┴┬┤├","│ ││││")
+				table_lines[i*2] = replace(table_lines[i*2], "┼─┴┬┤├","│ ││││")
 
 		if (attributes["grid"] != "cols") {
-			gsub("┬","─", tabel_lines[0])
+			gsub("┬","─", table_lines[0])
 			for (i=0;i<table_row_count;i++) {
-				tabel_lines[i*2] = inner_gsub(tabel_lines[i*2], "│", " ")
-				tabel_lines[i*2+1] = inner_gsub(tabel_lines[i*2+1], "│", " ")
-				tabel_lines[i*2] = inner_gsub(tabel_lines[i*2], "[^ ]", "─")
+				table_lines[i*2] = inner_gsub(table_lines[i*2], "│", " ")
+				table_lines[i*2+1] = inner_gsub(table_lines[i*2+1], "│", " ")
+				table_lines[i*2] = inner_gsub(table_lines[i*2], "[^ ]", "─")
 			}
-			gsub("┴","─", tabel_lines[i*2])
+			gsub("┴","─", table_lines[i*2])
 		}
 		# if grid == none or any undefined state, we want to delete it all
 	}
@@ -310,39 +353,39 @@ function render_table(data,    i, j, cols_attibutes, cols_attibute_count, grid) 
 	# similar to whats happenning above
 	if ("frame" in attributes && attributes["frame"] != "all") {
 		if (attributes["frame"] != "ends") {
-			tabel_lines[0] = replace(tabel_lines[0], "┌┐┬─", "│││ ")
-			tabel_lines[table_row_count*2] = replace(tabel_lines[table_row_count*2], "└┘┴─", "│││ ")
+			table_lines[0] = replace(table_lines[0], "┌┐┬─", "│││ ")
+			table_lines[table_row_count*2] = replace(table_lines[table_row_count*2], "└┘┴─", "│││ ")
 		} 
 
 		if (attributes["frame"] != "sides") { 
 			for (i=0;i<=table_row_count*2;i++) {
-				gsub(/^[│]/, " ", tabel_lines[i])
-				gsub(/^[├┌└]/, "─", tabel_lines[i])
-				gsub(/[│]\n/, " \n", tabel_lines[i])
-				gsub(/[┤┐┘]\n/, "─\n", tabel_lines[i])
+				gsub(/^[│]/, " ", table_lines[i])
+				gsub(/^[├┌└]/, "─", table_lines[i])
+				gsub(/[│]\n/, " \n", table_lines[i])
+				gsub(/[┤┐┘]\n/, "─\n", table_lines[i])
 			}
 		}
 	}
 
 	# restyling the table
 	if (opts_attributes["header"]) {
-		tabel_lines[0] = replace(tabel_lines[0], "┌┬┐─","╒╤╕═")
-		tabel_lines[2] = replace(tabel_lines[2], "├┼┤─└┴┘┬","╞╪╡═╘╧╛╤")
+		table_lines[0] = replace(table_lines[0], "┌┬┐─","╒╤╕═")
+		table_lines[2] = replace(table_lines[2], "├┼┤─└┴┘┬","╞╪╡═╘╧╛╤")
 	}
 
 	if (opts_attributes["footer"]) {
-		tabel_lines[table_row_count*2] = replace(tabel_lines[table_row_count*2], "└┴┘─","╘╧╛═")
-		tabel_lines[table_row_count*2-2]= replace(tabel_lines[table_row_count*2-2], "├┼┤─┌┬┐┴","╞╪╡═╒╤╕╧")
+		table_lines[table_row_count*2] = replace(table_lines[table_row_count*2], "└┴┘─","╘╧╛═")
+		table_lines[table_row_count*2-2]= replace(table_lines[table_row_count*2-2], "├┼┤─┌┬┐┴","╞╪╡═╒╤╕╧")
 	}
 
 	for (j=0;j<=table_row_count*2;j++)
-		printf("%s", tabel_lines[j])
+		printf("%s", table_lines[j])
 }
 # END of table draw functoins
 
 
 
-function parse_tabel(data, x_cel_size,    tmp, i, j, k, w, v,
+function parse_table(data, x_cel_size,    tmp, i, j, k, w, v,
 					 back_flag, up_flag) {
 	delete table_cels
 	delete table_cels_no_back_border
@@ -351,8 +394,8 @@ function parse_tabel(data, x_cel_size,    tmp, i, j, k, w, v,
 	delete table_cel_halign
 
 	# get the table_column_count
-	if (attributes["col-count"])
-		table_column_count = attributes["col-count"]
+	if (attributes["cols-count"])
+		table_column_count = attributes["cols-count"]
 	else
         table_column_count = first_line_slots(table_first_line)
 
@@ -369,7 +412,7 @@ function parse_tabel(data, x_cel_size,    tmp, i, j, k, w, v,
 	for (i=1;i<=item_count;i++) {
 		# edge case, we have no nxt_style when we are at the last pipe
 		if (item_count!=i) 
-			tmp[i] = parse_cel_specs(tmp[i])
+			tmp[i] = parse_cel_specs(tmp[i], i)
 
 		
 		# edge case, if we have a spec before the first pipe
@@ -460,7 +503,7 @@ function dump_table() {
 	parse_block_atrributes()
 	block_attribute_list = ""
 
-	sub(/ *$/,"",tabel_items)
+	sub(/ *$/,"",table_items)
 
 	if ("title" in attributes) {
 		printf("%s.", style_ti)
@@ -472,13 +515,13 @@ function dump_table() {
 		printf("%s\n",attributes["title"] style_none)
 	}
 
-	if (tabel_items != "") {
-		parse_tabel(tabel_items, table_cel_width)
-		render_table(tabel_items)
+	if (table_items != "") {
+		parse_table(table_items, table_cel_width)
+		render_table(table_items)
 	}
 
 	table_column_count = 0
-	delete tabel_lines
+	delete table_lines
 	delete attributes
 	delete opts_attributes
 }
@@ -595,12 +638,12 @@ in_table {
 
 	if (length(table_first_line) == 0)
 		table_first_line = $0
-	else if (!tabel_read_seccond_line) {
-		tabel_has_empty_seccond_line = length($0) == 0
-		tabel_read_seccond_line = 1
+	else if (!table_read_seccond_line) {
+		table_has_empty_seccond_line = length($0) == 0
+		table_read_seccond_line = 1
 	}
 
-	tabel_items = tabel_items " " $0
+	table_items = table_items " " $0
 	next
 }
 
@@ -609,9 +652,9 @@ in_table {
 	in_table = 1
 	table_first_line=""
 	table_termin = $1
-	tabel_items = ""
-	tabel_has_empty_seccond_line = 0
-	tabel_read_seccond_line = 0
+	table_items = ""
+	table_has_empty_seccond_line = 0
+	table_read_seccond_line = 0
 	next
 }
 
