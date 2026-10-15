@@ -51,9 +51,9 @@ function pad(s, c, n, align,    p, q, i) {
 	else return s q
 }
 
-# AI generated function
+# takes an array and the index to check
 function is_string_at(arr, i,    t) {
-	if (!(i in arr)) return 0          # undefined: not a string
+	if (!(i in arr)) return 0 # undefined: not a string
 	t = typeof(arr[i])
 	return (t == "string" || t == "strnum")
 }
@@ -73,7 +73,20 @@ function set_attribute(key, val, quoted,    tmp, i, c) {
 			tmp[i] = trim(tmp[i])
 			if (tmp[i] != "") opts_attributes[tmp[i]] = 1
 		}
-	} else attributes[key] = val
+		return
+	} 
+
+	if (key == "cols") {
+		if (val !~ /,/) {
+			attributes["col-count"] = int(val)
+			return
+		}
+
+		if (val !~ /\*/)
+		attributes["col-count"] = split(val, tmp, /[[:space:]]*,[[:space:]]*/)
+		return
+	}
+	attributes[key] = val
 }
 
 
@@ -163,74 +176,173 @@ function first_line_slots(line,   s, n, spec, num) {
 }
 
 
-BEGIN { # mostly variable assignments
-	style_none    ="\033[0m"
-	style_literal ="\033[48;5;0m"
-	style_listing ="\033[48;5;0m"
-	style_quote   = "\033[38;5;7m\033[48;5;0m"
-	style_example = "\033[33;40m"
-	style_sidebar = "\033[38;5;14m\033[48;5;0m"
-	style_open    = style_listing
 
-	style_h1 = "\033[1;35m"   # megenta
-	style_h2 = "\033[1;36m"   # cyan
-	style_h3 = "\033[1;33m"	  # yellow
+# functions to draw a table
+function row_draw(row,    border, txt, j, i, s) {
+	for (i=1;i<=table_column_count;i++) {
+		# find the index of the current element
+		j = row * table_column_count + i
 
-	style_ti = "\033[1;33m"
+		# get the text and pad it with spaces
+		txt = pad(table_cels[j], " ", table_cel_width[i],
+			cel_halign[table_cel_halign[j]])
 
-	style["literal"] = style_literal
-	style["listing"] = style_listing
-	style["open"]    = style_open
-	style["quote"]   = style_quote
-	style["example"] = style_example
-	style["sidebar"] = style_sidebar
+		# decide the border
+		border = table_cels_no_back_border[j] == 1 ? J["0000"] : J["1100"]
+
+		# append to the string
+		s = s border table_cel_styles[j] txt style_none 	
+	}
+	return s J["1100"] "\n"
+}
+
+function boarder_draw_top(     i, s, start) {
+	# the first cell
+	s = J["0101"] pad("", J["0011"], table_cel_width[1])
+
+	for (i=2;i<=table_column_count;i++) {
+		# decide what the next cell should start with
+		start = table_cels_no_back_border[i] == 1 ? J["0011"] : J["0111"] 
+
+		# append
+		s = s start pad("", J["0011"], table_cel_width[i])
+	}
+	return s J["0110"] "\n"
+}
+
+function boarder_draw_bottom(     i, j, s, start) {
+	# the first cell
+	s = J["1001"] pad("", J["0011"], table_cel_width[1])
+
+	# find the first cell in the last row
+	j = (table_row_count - 1) * table_column_count + 1
+
+	for (i=2;i<=table_column_count;i++) {
+		# decide what the next cell should start with
+		start = table_cels_no_back_border[++j] == 1 ? J["0011"] : J["1011"] 
+
+		# append
+		s = s start pad("", J["0011"], table_cel_width[i])
+	}
+	return s J["1010"] "\n"
+}
+
+function boarder_draw_mid(row,     i, j, s, border, start) {
+	# now this one is a bit more complex
+
+	# find the cell index and decide if weeven have a border 
+	j = row * table_column_count + 1
+	border = table_cels_no_up_border[j] == 1 ? J["0000"] : J["0011"]
+
+	# make the first cell
+	s = J["1101"] pad("", border, table_cel_width[1])
+
+	for (i=2;i<=table_column_count;i++) {
+		j++
+		border = (table_cels_no_up_border[j] == 1) ? J["0000"] : J["0011"]
+
+		# first look at the cell under the border
+		# then look at the cell above and decide the strting character
+		if (table_cels_no_back_border[j])
+			if (table_cels_no_back_border[j - table_column_count])
+				start =  J["0011"]
+			else start =  J["1011"]
+		else 
+			if (table_cels_no_back_border[j - table_column_count])
+				start = J["0111"]
+			else start = J["1111"] 
+
+		# construct the cell
+		s = s start pad("", border, table_cel_width[i])
+	}
+	s = s J["1110"] "\n"
+
+	# the start character is alot more complicated to determin
+	# so insted of making the if/else tower bigger, Im going to let the 
+	# neighboring charactes decide
+	gsub(" " J["0011"], " " J["0000"], s)
+	gsub(" " J["1111"], " " J["1101"], s)
+	gsub(" " J["1110"], " " J["1100"], s)
+	gsub(J["1101"] " ", J["1100"] " ", s)
+	gsub(J["1111"] " ", J["1110"] " ", s)
+
+	return s
+}
+
+function render_table(data,    i, j, cols_attibutes, cols_attibute_count, grid) {
+	# reder nothing if table is empty
+	if (table_row_count == 0) return
+
+	# construct a basic table
+	tabel_lines[0] = boarder_draw_top()
+	tabel_lines[1] = row_draw(0)
+	for (i=1;i<table_row_count;i++) {
+		tabel_lines[i*2] = boarder_draw_mid(i)
+		tabel_lines[i*2 +1] = row_draw(i)
+	}
+	tabel_lines[i*2] = boarder_draw_bottom()
+
+
+
+	if (!opts_attributes["noheader"] && tabel_has_empty_seccond_line)
+		opts_attributes["header"] = 1
+
 
 	
-	cel_spec_styles[""] = ""
-	cel_spec_styles["a"] = ""
-	cel_spec_styles["e"] = "\033[3m"
-	cel_spec_styles["h"] = "\033[1m"
-	cel_spec_styles["l"] = ""
-	cel_spec_styles["s"] = "\033[1m"
-	cel_spec_styles["v"] = ""
-	cel_spec_styles["m"] = ""
-	cel_spec_styles["d"] = ""
+	if ("grid" in attributes && attributes["grid"] != "all") {
+		# we dont touch it if its grid==all
+		if (attributes["grid"] != "rows")
+			for (i=1;i<table_row_count;i++)
+				tabel_lines[i*2] = replace(tabel_lines[i*2], "┼─┴┬┤├","│ ││││")
 
-	cel_halign["<"] = "l"
-	cel_halign["^"] = "c"
-	cel_halign[">"] = "r"
-
-	J["0000"]=" "; J["1000"]="│"; J["0100"]="│"; J["1100"]="│"
-	J["0010"]="─"; J["0001"]="─"; J["0011"]="─"
-	J["0101"]="┌"; J["0110"]="┐"; J["1001"]="└"; J["1010"]="┘"
-	J["1101"]="├"; J["1110"]="┤"; J["0111"]="┬"; J["1011"]="┴"; J["1111"]="┼"
-}
-
-{ # line cleanups
-	gsub(/\t/, "    ")
-	sub(/[ \t\r]+$/, "")
-}
-
-
-# block terminated
-in_basic_block {
-	if (basic_block_temin == $0) {
-		if (basic_block_type == "comment") { }
-		else delimeted_bock_dump(block_lines, block_index, 
-				block_max_len, style[basic_block_type], style_none)
-		in_basic_block = 0
-		next
+		if (attributes["grid"] != "cols") {
+			gsub("┬","─", tabel_lines[0])
+			for (i=0;i<table_row_count;i++) {
+				tabel_lines[i*2] = inner_gsub(tabel_lines[i*2], "│", " ")
+				tabel_lines[i*2+1] = inner_gsub(tabel_lines[i*2+1], "│", " ")
+				tabel_lines[i*2] = inner_gsub(tabel_lines[i*2], "[^ ]", "─")
+			}
+			gsub("┴","─", tabel_lines[i*2])
+		}
+		# if grid == none or any undefined state, we want to delete it all
 	}
 
-	block_lines[block_index++] = $0
-		if (length($0) > block_max_len)
-			block_max_len = length($0)
-	next
+	# similar to whats happenning above
+	if ("frame" in attributes && attributes["frame"] != "all") {
+		if (attributes["frame"] != "ends") {
+			tabel_lines[0] = replace(tabel_lines[0], "┌┐┬─", "│││ ")
+			tabel_lines[table_row_count*2] = replace(tabel_lines[table_row_count*2], "└┘┴─", "│││ ")
+		} 
+
+		if (attributes["frame"] != "sides") { 
+			for (i=0;i<=table_row_count*2;i++) {
+				gsub(/^[│]/, " ", tabel_lines[i])
+				gsub(/^[├┌└]/, "─", tabel_lines[i])
+				gsub(/[│]\n/, " \n", tabel_lines[i])
+				gsub(/[┤┐┘]\n/, "─\n", tabel_lines[i])
+			}
+		}
+	}
+
+	# restyling the table
+	if (opts_attributes["header"]) {
+		tabel_lines[0] = replace(tabel_lines[0], "┌┬┐─","╒╤╕═")
+		tabel_lines[2] = replace(tabel_lines[2], "├┼┤─└┴┘┬","╞╪╡═╘╧╛╤")
+	}
+
+	if (opts_attributes["footer"]) {
+		tabel_lines[table_row_count*2] = replace(tabel_lines[table_row_count*2], "└┴┘─","╘╧╛═")
+		tabel_lines[table_row_count*2-2]= replace(tabel_lines[table_row_count*2-2], "├┼┤─┌┬┐┴","╞╪╡═╒╤╕╧")
+	}
+
+	for (j=0;j<=table_row_count*2;j++)
+		printf("%s", tabel_lines[j])
 }
+# END of table draw functoins
 
 
 
-function parse_tabel(data, table_cels, x_cel_size,    tmp, i, j, k, w, v,
+function parse_tabel(data, x_cel_size,    tmp, i, j, k, w, v,
 					 back_flag, up_flag) {
 	delete table_cels
 	delete table_cels_no_back_border
@@ -238,8 +350,10 @@ function parse_tabel(data, table_cels, x_cel_size,    tmp, i, j, k, w, v,
 	delete table_cel_styles
 	delete table_cel_halign
 
-	# if we havent gotten it from attributes we get it from the first line
-    if (!table_column_count)          
+	# get the table_column_count
+	if (attributes["col-count"])
+		table_column_count = attributes["col-count"]
+	else
         table_column_count = first_line_slots(table_first_line)
 
 
@@ -339,237 +453,11 @@ function parse_tabel(data, table_cels, x_cel_size,    tmp, i, j, k, w, v,
         	x_cel_size[j] = length(table_cels[i])
     }
 }
-function parse_tabel_block_atrributes(    i, c, in_val, in_string, string_term, key) {
-	key=""
-	val=""
-	in_val = 0 
-	in_string = 0
-	for(i=1;i<=length(block_attribute_list);i++) {
-		c = substr(block_attribute_list,i,1)
-
-		if (in_escape) {
-			val = val c
-			in_escape = 0
-		}
-		else if (in_string == 3) {
-			# we are not in a quoted string 
-			# we read untill we hit a comma
-			if (c == ",") {
-				set_attribute(key, val)
-				in_string = 0
-				in_val = 0
-				key = ""
-				val = ""
-			}
-			else 
-			val = val c
-		} 
-
-		else if (in_string == 2 && c == ",") { 
-			# we have finished reading 
-			# and are waiting for the next attribute
-			set_attribute(key, val, 1)
-			in_string = 0
-			in_val = 0
-			key = ""
-			val = ""
-		} else if (in_string == 2){
-			# do nothing if string isnt ended
-		} 
-		else if (in_string == 1) {
-			# we are reading a string
-			if (c == "\\") in_escape = 1
-			else if (c == string_term)
-				in_string = 2
-			else val = val c
-		} 
-
-		else if (in_val) {
-			# we are not in a string but we are reading a val
-			if (c == "\"" || c == "'") {
-				in_string = 1
-				string_term = c
-			} else if ( c ~ /[[:space:]]/) {
-			} else {
-				val = val c
-				in_string = 3
-			}
-		}
-		else {
-			if (c == "=") {
-				in_val = 1
-			} else if (c == ","){
-				key = ""
-			} else {
-				key = key c
-			}
-		}
-	}	
-	set_attribute(key, val)
-}
-
-
-
-function row_draw(row,    border, txt, j, i, s) {
-	s = ""
-	for (i=1;i<=table_column_count;i++) {
-		j = row * table_column_count + i
-		txt = pad(items_list[j], " ", table_cel_width[i],
-			cel_halign[table_cel_halign[j]])
-		border = table_cels_no_back_border[j] == 1 ? " " : "│"
-		s = s border table_cel_styles[j] txt style_none 	
-	}
-	return s "│\n"
-}
-
-function boarder_draw_top(     i, s, border, start) {
-	border = J["0011"]
-	s = J["0101"] pad("", border, table_cel_width[1])
-
-	for (i=2;i<=table_column_count;i++) {
-		start = table_cels_no_back_border[i] == 1 ? J["0011"] : J["0111"] 
-		s = s start pad("", border, table_cel_width[i])
-	}
-	return s J["0110"] "\n"
-}
-
-function boarder_draw_bottom(     i, j, s, border, start) {
-	border = J["0011"]
-	s = J["1001"] pad("", border, table_cel_width[1])
-
-	j = (table_row_count - 1) * table_column_count + 1
-	for (i=2;i<=table_column_count;i++) {
-		start = table_cels_no_back_border[++j] == 1 ? J["0011"] : J["1011"] 
-		s = s start pad("", border, table_cel_width[i])
-	}
-	return s J["1010"] "\n"
-}
-
-function boarder_draw_mid(row,     i, j, s, border, start) {
-	j = row * table_column_count + 1
-	border = table_cels_no_up_border[j] == 1 ? " " : "─"
-
-	s = J["1101"] pad("", border, table_cel_width[1])
-	for (i=2;i<=table_column_count;i++) {
-		j++
-		border = (table_cels_no_up_border[j] == 1) ? " " : "─"
-		if (table_cels_no_back_border[j] == 1) {
-			if (table_cels_no_back_border[j - table_column_count] == 1)
-				start =  J["0011"]
-			else start =  J["1011"]
-
-		} else {
-			if (table_cels_no_back_border[j - table_column_count] == 1)
-				start = J["0111"]
-			else start = J["1111"] 
-		}
-		s = s start pad("", border, table_cel_width[i])
-	}
-	return s J["1110"] "\n"
-}
-
-function render_table(data,    i, j, cols_attibutes, cols_attibute_count, grid) {
-	if ("cols" in attributes) {
-		cols_attibute_count = split(attributes["cols"], cols_attibutes, ",")
-		if (cols_attibute_count == 1)
-			table_column_count = int(attributes["cols"])
-		else
-			table_column_count = cols_attibute_count
-	}
-
-	parse_tabel(data, items_list, table_cel_width)
-
-	if (table_row_count == 0) return
-
-	# determin_grid_type
-	if ("grid" in attributes) {
-		grid = "r"
-	} else grid = "a"
-
-	# construct the top border
-	tabel_lines[0] = boarder_draw_top()
-
-	# construct the top cells
-	tabel_lines[1] = row_draw(0)
-
-	for (i=1;i<table_row_count;i++) {
-		tabel_lines[i*2] = boarder_draw_mid(i)
-		tabel_lines[i*2 +1] = row_draw(i)
-	}
-	
-	# construct the botom
-	tabel_lines[i*2] = boarder_draw_bottom()
-
-	if (!opts_attributes["noheader"] && tabel_has_empty_seccond_line)
-		opts_attributes["header"] = 1
-
-	# fixinng table border gaps
-	for (i=0;i<table_row_count;i++) {
-		gsub(/├[ ]/, "│ ", tabel_lines[i*2])
-		gsub(/[ ]┤/, " │", tabel_lines[i*2])
-		gsub(/[ ]┼/, " ├", tabel_lines[i*2])
-		gsub(/┼[ ]/, "┤ ", tabel_lines[i*2])
-		gsub(/├[ ]/, "│ ", tabel_lines[i*2])
-		gsub(/[ ]─/, "  ", tabel_lines[i*2])
-	}
-	
-
-	
-	if ("grid" in attributes && attributes["grid"] != "all") {
-		# we dont touch it if its grid==all
-		if (attributes["grid"] != "rows")
-			for (i=1;i<table_row_count;i++)
-				tabel_lines[i*2] = replace(tabel_lines[i*2], "┼─┴┬┤├","│ ││││")
-
-		if (attributes["grid"] != "cols") {
-			gsub("┬","─", tabel_lines[0])
-			for (i=0;i<table_row_count*2;i++) {
-				tabel_lines[i] = inner_gsub(tabel_lines[i], "│", " ")
-				tabel_lines[i] = inner_gsub(tabel_lines[i], "┤", "─")
-				tabel_lines[i] = inner_gsub(tabel_lines[i], "├", "─")
-				gsub(/┼/, "─", tabel_lines[i])
-			}
-			gsub("┴","─", tabel_lines[i])
-		}
-		# if grid == none or any undefined state we want to delete it all
-	}
-
-	# similar to whats happenning above
-	if ("frame" in attributes && attributes["frame"] != "all") {
-		if (attributes["frame"] != "ends") {
-			tabel_lines[0] = replace(tabel_lines[0], "┌┐┬─", "│││ ")
-			tabel_lines[table_row_count*2] = replace(tabel_lines[table_row_count*2], "└┘┴─", "│││ ")
-		} 
-
-		if (attributes["frame"] != "sides") { 
-			for (i=0;i<=table_row_count*2;i++) {
-				gsub(/^[│]/, " ", tabel_lines[i])
-				gsub(/^[├┌└]/, "─", tabel_lines[i])
-				gsub(/[│]\n/, " \n", tabel_lines[i])
-				gsub(/[┤┐┘]\n/, "─\n", tabel_lines[i])
-			}
-		}
-	}
-
-	# restyling the table
-	if (opts_attributes["header"]) {
-		tabel_lines[0] = replace(tabel_lines[0], "┌┬┐─","╒╤╕═")
-		tabel_lines[2] = replace(tabel_lines[2], "├┼┤─└┴┘┬","╞╪╡═╘╧╛╤")
-	}
-
-	if (opts_attributes["footer"]) {
-		tabel_lines[table_row_count*2] = replace(tabel_lines[table_row_count*2], "└┴┘─","╘╧╛═")
-		tabel_lines[table_row_count*2-2]= replace(tabel_lines[table_row_count*2-2], "├┼┤─┌┬┐┴","╞╪╡═╒╤╕╧")
-	}
-
-	for (j=0;j<=table_row_count*2;j++)
-		printf("%s", tabel_lines[j])
-}
 
 function dump_table() {
 	in_table = 0
 
-	parse_tabel_block_atrributes()
+	parse_block_atrributes()
 	block_attribute_list = ""
 
 	sub(/ *$/,"",tabel_items)
@@ -584,13 +472,120 @@ function dump_table() {
 		printf("%s\n",attributes["title"] style_none)
 	}
 
-	if (tabel_items != "") render_table(tabel_items)
+	if (tabel_items != "") {
+		parse_tabel(tabel_items, table_cel_width)
+		render_table(tabel_items)
+	}
 
 	table_column_count = 0
 	delete tabel_lines
 	delete attributes
 	delete opts_attributes
 }
+
+
+
+BEGIN { # mostly variable assignments
+	style_none    ="\033[0m"
+	style_literal ="\033[48;5;0m"
+	style_listing ="\033[48;5;0m"
+	style_quote   = "\033[38;5;7m\033[48;5;0m"
+	style_example = "\033[33;40m"
+	style_sidebar = "\033[38;5;14m\033[48;5;0m"
+	style_open    = style_listing
+
+	style_h1 = "\033[1;35m"   # megenta
+	style_h2 = "\033[1;36m"   # cyan
+	style_h3 = "\033[1;33m"	  # yellow
+
+	style_ti = "\033[1;33m"
+
+	style["literal"] = style_literal
+	style["listing"] = style_listing
+	style["open"]    = style_open
+	style["quote"]   = style_quote
+	style["example"] = style_example
+	style["sidebar"] = style_sidebar
+
+	
+	cel_spec_styles[""] = ""
+	cel_spec_styles["a"] = ""
+	cel_spec_styles["e"] = "\033[3m"
+	cel_spec_styles["h"] = "\033[1m"
+	cel_spec_styles["l"] = ""
+	cel_spec_styles["s"] = "\033[1m"
+	cel_spec_styles["v"] = ""
+	cel_spec_styles["m"] = ""
+	cel_spec_styles["d"] = ""
+
+	cel_halign["<"] = "l"
+	cel_halign["^"] = "c"
+	cel_halign[">"] = "r"
+
+	J["0000"]=" "; J["1000"]="│"; J["0100"]="│"; J["1100"]="│"
+	J["0010"]="─"; J["0001"]="─"; J["0011"]="─"
+	J["0101"]="┌"; J["0110"]="┐"; J["1001"]="└"; J["1010"]="┘"
+	J["1101"]="├"; J["1110"]="┤"; J["0111"]="┬"; J["1011"]="┴"; J["1111"]="┼"
+}
+
+{ # line cleanups
+	gsub(/\t/, "    ")
+	sub(/[ \t\r]+$/, "")
+}
+
+
+# block terminated
+in_basic_block {
+	if (basic_block_temin == $0) {
+		if (basic_block_type == "comment") { }
+		else delimeted_bock_dump(block_lines, block_index, 
+				block_max_len, style[basic_block_type], style_none)
+		in_basic_block = 0
+		next
+	}
+
+	block_lines[block_index++] = $0
+		if (length($0) > block_max_len)
+			block_max_len = length($0)
+	next
+}
+
+
+# parses block_attribute_list into attributes[] and opts_attributes[]
+function parse_block_atrributes(    s, entry, key, val, quoted, eq) {
+	s = block_attribute_list
+
+	while (s != "") {
+		# 1. key = "quoted" or key = 'quoted' (with \ escapes inside)
+		if (match(s, /^[^=,]*=[ ]*"([^"\\]|\\.)*"/) ||
+		    match(s, /^[^=,]*=[ ]*'([^'\\]|\\.)*'/))
+			quoted = 1
+		# 2. anything else runs to the next comma (key=value, or a bare word)
+		else {
+			match(s, /^[^,]*/)
+			quoted = 0
+		}
+
+		entry = substr(s, 1, RLENGTH)
+		sub(/^[^,]*,?/, "", s)   # drop the entry, junk after a closing quote, and the comma
+
+		eq = index(entry, "=")
+		if (eq == 0) { key = entry; val = "" }
+		else {
+			key = substr(entry, 1, eq - 1)
+			val = substr(entry, eq + 1)
+			sub(/^[ ]+/, "", val)
+			if (quoted) {
+				val = substr(val, 2, length(val) - 2)        # strip the quotes
+				val = gensub(/\\(.)/, "\\1", "g", val)       # unescape \" and \\
+			}
+		}
+		set_attribute(key, val, quoted)
+	}
+}
+
+
+
 
 in_table {
 	if (table_termin == $0) {
