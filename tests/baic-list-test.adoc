@@ -1,0 +1,224 @@
+=== 01 Single item
+
+* Alpha
+
+=== 02 — Multiple items
+
+* Alpha
+* Bravo
+* Charlie
+
+=== 03 — Different content
+
+* 123
+* !@#$%^&*()
+* äöü ÄÖÜ ß
+* hello world
+
+
+=== 04 — Empty item
+
+*
+* 
+* Next
+
+
+=== 05 — Two levels
+
+* Parent
+** Child
+* Parent again
+
+
+=== 06 — Four levels
+
+* One
+** Two
+*** Three
+**** Four
+
+
+=== 07 — Deep to shallow
+
+
+**** Deep
+*** Less deep
+** Less again
+* Root
+
+
+=== 08 — Repeated depth
+
+
+* Root
+** Child A
+** Child B
+*** Grandchild
+** Child C
+* Root B
+
+
+
+= 3. Continuation lines
+
+
+=== 09 — One continuation
+
+
+* First line
+continuation line
+
+
+
+=== 10 — Multiple continuations
+
+
+* First line
+second line
+third line
+fourth line
+
+
+
+=== 11 — Continuation after nesting
+
+
+* Parent
+** Child
+child continuation
+* Next parent
+
+
+
+=== 12 — Continuation that resembles a heading
+
+
+* Item
+== Heading
+
+
+
+=== 13 — Continuation that resembles another block
+
+
+* Item
+----
+literal block?
+----
+
+
+
+= 4. Termination and separation
+
+
+=== 14 — Blank line ends the list
+
+
+* Item A
+* Item B
+
+Ordinary paragraph.
+
+
+
+=== 15 — Two lists separated by a blank line
+
+
+* A
+* B
+
+* C
+* D
+
+
+
+=== 16 — Several blank lines
+
+
+* Item
+
+
+* Another item
+
+
+=== 17 — Whitespace-only line
+
+
+* Item
+
+* Next
+
+
+
+=== 18 — End of file
+
+`
+
+= 5. False positives and regex edge cases
+
+
+=== 19 — Ordinary leading space
+
+
+ This is not a list item.
+
+
+
+=== 20 — Several leading spaces
+
+
+   Indented text, not a list.
+
+
+
+=== 21 — Asterisk without a following space
+
+
+*Not a list item
+
+
+=== 22 — Asterisk embedded in text
+
+
+This * is ordinary text.
+
+
+
+=== 23 — Tab before marker
+
+
+	* Item after a tab
+
+
+
+=== 24 — Spaces before marker
+
+
+ * Indented marker
+
+
+= 6. Interaction with `in_paragraph`
+
+
+=== 25 — List outside a paragraph
+
+
+* Item
+
+
+
+=== 26 — Marker while `in_paragraph` is true
+
+
+* Item
+
+
+=== 27 — Paragraph state changes during a list
+
+
+* Item
+continuation
+* Next
+
+
+

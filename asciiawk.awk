@@ -59,10 +59,45 @@ function is_string_at(arr, i,    t) {
 }
 # END of utility functions
 
+
+
+# parses block_attribute_list into attributes[] and opts_attributes[]
+function parse_block_atrributes(    s, entry, key, val, quoted, eq) {
+	s = block_attribute_list
+
+	while (s != "") {
+		# 1. key = "quoted" or key = 'quoted' (with \ escapes inside)
+		if (match(s, /^[^=,]*=[ ]*"([^"\\]|\\.)*"/) ||
+		    match(s, /^[^=,]*=[ ]*'([^'\\]|\\.)*'/))
+			quoted = 1
+		# 2. anything else runs to the next comma (key=value, or a bare word)
+		else {
+			match(s, /^[^,]*/)
+			quoted = 0
+		}
+
+		entry = substr(s, 1, RLENGTH)
+		sub(/^[^,]*,?/, "", s)   # drop the entry, junk after a closing quote, and the comma
+
+		eq = index(entry, "=")
+		if (eq == 0) { key = entry; val = "" }
+		else {
+			key = substr(entry, 1, eq - 1)
+			val = substr(entry, eq + 1)
+			sub(/^[ ]+/, "", val)
+			if (quoted) {
+				val = substr(val, 2, length(val) - 2)        # strip the quotes
+				val = gensub(/\\(.)/, "\\1", "g", val)       # unescape \" and \\
+			}
+		}
+		set_attribute(key, val, quoted)
+	}
+}
+
 # helper function for dealing with the cols attribute
 function parse_table_cols(s,    n, i, j, mul, idx, tmp, tmp2) {
 	# we dont have a list to parse
-	if (s ~ /^[0-9]+\*?[[:space:]]*[^,]/) {
+	if (s ~ /^[0-9]+$/) {
 		attributes["cols-count"] = int(s)
 		return
 	}
@@ -98,13 +133,15 @@ function parse_table_cols(s,    n, i, j, mul, idx, tmp, tmp2) {
 			sub(/[<^>]+$/, "", tmp[i])
 		}
 		idx++
-		
-		while (--mul) {
+
+		while (--mul>0) {
+
 			table_col_style[idx] = table_col_style[idx-1]
 			table_col_width[idx] = table_col_width[idx-1]
 			table_col_halign[idx] = table_col_halign[idx-1]
 			table_col_valign[idx] = table_col_valign[idx-1]
 			idx++
+
 		}
 	}
 
@@ -128,7 +165,6 @@ function set_attribute(key, val, quoted,    tmp, i, c) {
 	} else if (key == "cols") parse_table_cols(val)
 	else attributes[key] = val
 }
-
 
 
 # an ugly function that takes a raw cell declaration and parses the next cell's
@@ -384,7 +420,6 @@ function render_table(data,    i, j, cols_attibutes, cols_attibute_count, grid) 
 # END of table draw functoins
 
 
-
 function parse_table(data, x_cel_size,    tmp, i, j, k, w, v,
 					 back_flag, up_flag) {
 	delete table_cels
@@ -412,7 +447,7 @@ function parse_table(data, x_cel_size,    tmp, i, j, k, w, v,
 	for (i=1;i<=item_count;i++) {
 		# edge case, we have no nxt_style when we are at the last pipe
 		if (item_count!=i) 
-			tmp[i] = parse_cel_specs(tmp[i], i)
+			tmp[i] = parse_cel_specs(tmp[i], j)
 
 		
 		# edge case, if we have a spec before the first pipe
@@ -495,6 +530,11 @@ function parse_table(data, x_cel_size,    tmp, i, j, k, w, v,
         if (x_cel_size[j] < length(table_cels[i])) 
         	x_cel_size[j] = length(table_cels[i])
     }
+
+	delete table_col_valign
+	delete table_col_halign
+	delete table_col_style
+	delete table_col_width
 }
 
 function dump_table() {
@@ -518,6 +558,7 @@ function dump_table() {
 	if (table_items != "") {
 		parse_table(table_items, table_cel_width)
 		render_table(table_items)
+		printf("\n")
 	}
 
 	table_column_count = 0
@@ -525,6 +566,7 @@ function dump_table() {
 	delete attributes
 	delete opts_attributes
 }
+
 
 
 
@@ -542,6 +584,8 @@ BEGIN { # mostly variable assignments
 	style_h3 = "\033[1;33m"	  # yellow
 
 	style_ti = "\033[1;33m"
+
+	style_li = "\033[1;32m"	  # yellow
 
 	style["literal"] = style_literal
 	style["listing"] = style_listing
@@ -569,11 +613,20 @@ BEGIN { # mostly variable assignments
 	J["0010"]="─"; J["0001"]="─"; J["0011"]="─"
 	J["0101"]="┌"; J["0110"]="┐"; J["1001"]="└"; J["1010"]="┘"
 	J["1101"]="├"; J["1110"]="┤"; J["0111"]="┬"; J["1011"]="┴"; J["1111"]="┼"
-}
 
+	paragraph_width = 80
+}
 { # line cleanups
 	gsub(/\t/, "    ")
 	sub(/[ \t\r]+$/, "")
+}
+
+
+function dump_paragraph() {
+	if (paraghraph_text != "")
+		print(paraghraph_text)
+	paraghraph_text = ""
+	in_paragraph = 0
 }
 
 
@@ -592,43 +645,6 @@ in_basic_block {
 			block_max_len = length($0)
 	next
 }
-
-
-# parses block_attribute_list into attributes[] and opts_attributes[]
-function parse_block_atrributes(    s, entry, key, val, quoted, eq) {
-	s = block_attribute_list
-
-	while (s != "") {
-		# 1. key = "quoted" or key = 'quoted' (with \ escapes inside)
-		if (match(s, /^[^=,]*=[ ]*"([^"\\]|\\.)*"/) ||
-		    match(s, /^[^=,]*=[ ]*'([^'\\]|\\.)*'/))
-			quoted = 1
-		# 2. anything else runs to the next comma (key=value, or a bare word)
-		else {
-			match(s, /^[^,]*/)
-			quoted = 0
-		}
-
-		entry = substr(s, 1, RLENGTH)
-		sub(/^[^,]*,?/, "", s)   # drop the entry, junk after a closing quote, and the comma
-
-		eq = index(entry, "=")
-		if (eq == 0) { key = entry; val = "" }
-		else {
-			key = substr(entry, 1, eq - 1)
-			val = substr(entry, eq + 1)
-			sub(/^[ ]+/, "", val)
-			if (quoted) {
-				val = substr(val, 2, length(val) - 2)        # strip the quotes
-				val = gensub(/\\(.)/, "\\1", "g", val)       # unescape \" and \\
-			}
-		}
-		set_attribute(key, val, quoted)
-	}
-}
-
-
-
 
 in_table {
 	if (table_termin == $0) {
@@ -655,6 +671,12 @@ in_table {
 	table_items = ""
 	table_has_empty_seccond_line = 0
 	table_read_seccond_line = 0
+
+	if (in_list) {
+		printf("\n\n")
+		in_list = 0
+	}
+	dump_paragraph()
 	next
 }
 
@@ -676,10 +698,14 @@ in_table {
 	basic_block_temin = $1
 	block_max_len=1
 	block_index=0
+
+	if (in_list) {
+		printf("\n\n")
+		in_list = 0
+	}
+	dump_paragraph()
 	next
 }
-
-
 
 
 # this is comment
@@ -687,8 +713,35 @@ in_table {
 # we just pretend we did'nt see it
 
 
+# title 
+/^\.{1,2}[^ \.].*/ {
+	$0 = substr($0,2)
+	gsub(/"/, "\\\"", $0)
+	block_attribute_list = block_attribute_list "title=\"" trim($0) "\","
+	next
+}
+
+
+# in list
+(/^\** / && !in_paragraph) || in_list {
+	if ($0 == "") {
+		printf("\n\n")
+		in_list = 0
+		next
+	}
+	in_list = 1
+	if (match($0, /^\** /)) {
+		sub(/^\** /, "")
+		printf("\n%*s%s*%s %s ", RLENGTH-2, "", style_li, style_none, $0)
+	} else printf("%s ", $0)
+
+	next
+}
+
 # headings
 /^={1,6}[[:space:]]+/ {
+	dump_paragraph()
+
 	if (/^======/) {
 		indent=6
 		h_style = style_h3
@@ -717,7 +770,7 @@ in_table {
 
 
 	sub(/^=+[[:space:]]*/, "")
-	printf("%*s%s%s%s\n", indent, "", h_style, $0, style_none)
+	printf("%*s%s%s%s\n\n", indent, "", h_style, $0, style_none)
 	next
 }
 
@@ -743,16 +796,18 @@ in_table {
 	next
 }
 
-# title 
-/^\.{1,2}[^ \.].*/ {
-	$0 = substr($0,2)
-	gsub(/"/, "\\\"", $0)
-	block_attribute_list = block_attribute_list "title=\"" trim($0) "\","
+{
+	if ($0 == "") next
+	paraghraph_text = paraghraph_text $0 "\n"
+	in_paragraph = 1
 	next
 }
 
 
-{ print }
+{ 
+	dump_paragraph()
+	print("")
+}
 
 END {
 	# to make sure unterminated blocks still get printed
@@ -762,6 +817,8 @@ END {
 			block_max_len, style[basic_block_type], style_none)
 	if (in_table)
 		dump_table()
+	if (paraghraph_text != "") 
+		dump_paragraph()
 
-	printf(style_none) # to make sure the style wont bleed out
+	printf(style_none "\n") # to make sure the style wont bleed out
 }

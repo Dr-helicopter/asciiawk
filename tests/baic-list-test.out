@@ -1,0 +1,180 @@
+   [1;33m01 Single item[0m
+
+
+[1;32m*[0m Alpha 
+
+   [1;33m02 — Multiple items[0m
+
+
+[1;32m*[0m Alpha 
+[1;32m*[0m Bravo 
+[1;32m*[0m Charlie 
+
+   [1;33m03 — Different content[0m
+
+
+[1;32m*[0m 123 
+[1;32m*[0m !@#$%^&*() 
+[1;32m*[0m äöü ÄÖÜ ß 
+[1;32m*[0m hello world 
+
+   [1;33m04 — Empty item[0m
+
+*
+*
+* Next
+
+   [1;33m05 — Two levels[0m
+
+
+[1;32m*[0m Parent 
+ [1;32m*[0m Child 
+[1;32m*[0m Parent again 
+
+   [1;33m06 — Four levels[0m
+
+
+[1;32m*[0m One 
+ [1;32m*[0m Two 
+  [1;32m*[0m Three 
+   [1;32m*[0m Four 
+
+   [1;33m07 — Deep to shallow[0m
+
+
+   [1;32m*[0m Deep 
+  [1;32m*[0m Less deep 
+ [1;32m*[0m Less again 
+[1;32m*[0m Root 
+
+   [1;33m08 — Repeated depth[0m
+
+
+[1;32m*[0m Root 
+ [1;32m*[0m Child A 
+ [1;32m*[0m Child B 
+  [1;32m*[0m Grandchild 
+ [1;32m*[0m Child C 
+[1;32m*[0m Root B 
+
+[1;35m3. Continuation lines[0m
+
+   [1;33m09 — One continuation[0m
+
+
+[1;32m*[0m First line continuation line 
+
+   [1;33m10 — Multiple continuations[0m
+
+
+[1;32m*[0m First line second line third line fourth line 
+
+   [1;33m11 — Continuation after nesting[0m
+
+
+[1;32m*[0m Parent 
+ [1;32m*[0m Child child continuation 
+[1;32m*[0m Next parent 
+
+   [1;33m12 — Continuation that resembles a heading[0m
+
+
+[1;32m*[0m Item == Heading 
+
+   [1;33m13 — Continuation that resembles another block[0m
+
+
+[1;32m*[0m Item 
+
+[48;5;0m                [0m
+[48;5;0m literal block? [0m
+[48;5;0m                [0m
+[1;35m4. Termination and separation[0m
+
+   [1;33m14 — Blank line ends the list[0m
+
+
+[1;32m*[0m Item A 
+[1;32m*[0m Item B 
+
+Ordinary paragraph.
+
+   [1;33m15 — Two lists separated by a blank line[0m
+
+
+[1;32m*[0m A 
+[1;32m*[0m B 
+
+
+[1;32m*[0m C 
+[1;32m*[0m D 
+
+   [1;33m16 — Several blank lines[0m
+
+
+[1;32m*[0m Item 
+
+
+[1;32m*[0m Another item 
+
+   [1;33m17 — Whitespace-only line[0m
+
+
+[1;32m*[0m Item 
+
+
+[1;32m*[0m Next 
+
+   [1;33m18 — End of file[0m
+
+`
+
+[1;35m5. False positives and regex edge cases[0m
+
+   [1;33m19 — Ordinary leading space[0m
+
+
+ [1;32m*[0m This is not a list item. 
+
+   [1;33m20 — Several leading spaces[0m
+
+
+ [1;32m*[0m   Indented text, not a list. 
+
+   [1;33m21 — Asterisk without a following space[0m
+
+*Not a list item
+
+   [1;33m22 — Asterisk embedded in text[0m
+
+This * is ordinary text.
+
+   [1;33m23 — Tab before marker[0m
+
+
+ [1;32m*[0m    * Item after a tab 
+
+   [1;33m24 — Spaces before marker[0m
+
+
+ [1;32m*[0m * Indented marker 
+
+[1;35m6. Interaction with `in_paragraph`[0m
+
+   [1;33m25 — List outside a paragraph[0m
+
+
+[1;32m*[0m Item 
+
+   [1;33m26 — Marker while `in_paragraph` is true[0m
+
+
+[1;32m*[0m Item 
+
+   [1;33m27 — Paragraph state changes during a list[0m
+
+
+[1;32m*[0m Item continuation 
+[1;32m*[0m Next 
+
+[0m

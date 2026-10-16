@@ -28,6 +28,7 @@ for f in tests/*.adoc; do
 		fail=$((fail + 1))
 		echo "FAIL: $f"
 		diff -u "$exp" "$tmp"  | cat -v | tail -n +3
+		diff -u "$exp" "$tmp"  --color=always
 	fi
 done
 
