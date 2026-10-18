@@ -616,6 +616,7 @@ BEGIN { # mostly variable assignments
 
 	paragraph_width = 80
 }
+
 { # line cleanups
 	gsub(/\t/, "    ")
 	sub(/[ \t\r]+$/, "")
@@ -724,6 +725,7 @@ in_table {
 
 # in list
 (/^\** / && !in_paragraph) || in_list {
+	sub(/^[[:space:]]*/, "")
 	if ($0 == "") {
 		printf("\n\n")
 		in_list = 0
@@ -797,17 +799,16 @@ in_table {
 }
 
 {
-	if ($0 == "") next
+	if ($0 == "") {
+		dump_paragraph()
+		next
+	}
 	paraghraph_text = paraghraph_text $0 "\n"
 	in_paragraph = 1
 	next
 }
 
 
-{ 
-	dump_paragraph()
-	print("")
-}
 
 END {
 	# to make sure unterminated blocks still get printed
