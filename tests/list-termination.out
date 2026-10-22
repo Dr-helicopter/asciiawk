@@ -1,0 +1,328 @@
+[1;35mList Termination Torture Test[0m
+
+:toc:
+
+This opening paragraph establishes the initial document context.
+The actual tests begin below.
+
+
+[1;32m1[0m BASELINE A 
+[1;32m2[0m BASELINE B 
+[1;32m3[0m TWO BLANK LINES A 
+[1;32m4[0m TWO BLANK LINES B 
+[1;32m5[0m THREE BLANK LINES A 
+[1;32m6[0m THREE BLANK LINES B 
+[1;32m7[0m MANY BLANK LINES A 
+[1;32m8[0m MANY BLANK LINES B 
+[1;32m9[0m MANY MORE BLANK LINES A 
+[1;32m10[0m MANY MORE BLANK LINES B 
+
+[1;32m1[0m COMMENT-AFTER-ITEM A 
+[1;32m2[0m COMMENT-AFTER-ITEM B 
+
+[1;32m1[0m COMMENT-AFTER-BLANKS A 
+
+[1;32m1[0m COMMENT-AFTER-BLANKS B 
+
+[1;32m1[0m MULTIPLE-COMMENTS A 
+[1;32m2[0m MULTIPLE-COMMENTS B 
+
+[1;32m1[0m COMMENT-BLANK-COMMENT A 
+
+[1;32m1[0m COMMENT-BLANK-COMMENT B 
+
+[1;32m1[0m LEADING-COMMENT A 
+[1;32m2[0m LEADING-COMMENT B 
+
+[1;32m1[0m BLANK-COMMENT-NEXT A 
+
+[1;32m1[0m BLANK-COMMENT-NEXT B 
+
+[1;32m1[0m COMMENT-THEN-TEXT A ordinary paragraph after comment 
+[1;32m2[0m COMMENT-THEN-TEXT B 
+
+[1;32m1[0m TEXT-TERMINATION A 
+
+ordinary paragraph
+
+
+[1;32m1[0m TEXT-TERMINATION B 
+
+[1;32m1[0m TEXT-IMMEDIATE A ordinary paragraph immediately after item 
+[1;32m2[0m TEXT-IMMEDIATE B 
+
+[1;32m1[0m ATTRIBUTE-ENTRY A :some-attribute: some value 
+[1;32m2[0m ATTRIBUTE-ENTRY B 
+
+[1;32m1[0m BLOCK-ATTRIBUTE A 
+[1;32m2[0m BLOCK-ATTRIBUTE B 
+
+[1;32m1[0m MULTIPLE-ATTRIBUTES A # MULTIPLE-ATTRIBUTES B 
+
+[1;32m1[0m ATTRIBUTE-BLANKS A 
+
+[1;32m1[0m ATTRIBUTE-BLANKS B 
+
+[1;32m1[0m TITLE-BEFORE A .Title attached to the next block 
+[1;32m2[0m TITLE-BEFORE B 
+
+[1;32m1[0m TITLE-BLANKS A 
+
+[1;33m.Title after blank lines[0m
+
+[1;32m1[0m TITLE-BLANKS B 
+
+[1;32m1[0m TITLE-COMMENT A .Title after comment 
+[1;32m2[0m TITLE-COMMENT B 
+
+[1;32m1[0m COMMENT-TITLE A .Title after comment 
+[1;32m2[0m COMMENT-TITLE B 
+
+[1;32m1[0m ANCHOR A [[some-anchor]] 
+[1;32m2[0m ANCHOR B 
+
+[1;32m1[0m ID-SHORTHAND A 
+[1;32m2[0m ID-SHORTHAND B 
+
+[1;32m1[0m HRULE A 
+
+'''
+
+
+[1;32m1[0m HRULE B 
+
+[1;32m1[0m LITERAL-DELIMITER A 
+
+[48;5;0m                       [0m
+[48;5;0m literal block content [0m
+[48;5;0m                       [0m
+
+[1;32m1[0m LITERAL-DELIMITER B 
+
+[1;32m1[0m LISTING-DELIMITER A 
+
+[48;5;0m                       [0m
+[48;5;0m listing block content [0m
+[48;5;0m                       [0m
+
+[1;32m1[0m LISTING-DELIMITER B 
+
+[1;32m1[0m EXAMPLE-DELIMITER A 
+
+[33;40m                       [0m
+[33;40m example block content [0m
+[33;40m                       [0m
+
+[1;32m1[0m EXAMPLE-DELIMITER B 
+
+[1;32m1[0m OPEN-DELIMITER A 
+
+[48;5;0m                    [0m
+[48;5;0m open block content [0m
+[48;5;0m                    [0m
+
+[1;32m1[0m OPEN-DELIMITER B 
+
+[1;32m1[0m QUOTE-DELIMITER A 
+
+[38;5;7m[48;5;0m                [0m
+[38;5;7m[48;5;0m quoted content [0m
+[38;5;7m[48;5;0m                [0m
+
+[1;32m1[0m QUOTE-DELIMITER B 
+
+[1;32m1[0m COMMENT-BLOCK A 
+
+
+[1;32m1[0m COMMENT-BLOCK B 
+
+  [1;36mmark[0m
+
+
+[1;32m1[0m SLASH-COMMENT A 
+[1;32m2[0m SLASH-COMMENT B 
+
+[1;32m1[0m COMMENT-GAP-ITEM A 
+
+[1;32m1[0m COMMENT-GAP-ITEM B 
+
+[1;32m1[0m COMMENTS-GAP-ITEM A 
+
+[1;32m1[0m COMMENTS-GAP-ITEM B 
+
+[1;32m1[0m HEADING-LEVEL-1 A = A New Document Title 
+[1;32m2[0m HEADING-LEVEL-1 B 
+
+[1;32m1[0m HEADING-LEVEL-2 A == A Section 
+[1;32m2[0m HEADING-LEVEL-2 B 
+
+[1;32m1[0m HEADING-LEVEL-3 A === A Subsection 
+[1;32m2[0m HEADING-LEVEL-3 B 
+
+[1;32m1[0m HEADING-COMMENT A == Section After Comment 
+[1;32m2[0m HEADING-COMMENT B 
+
+[1;32m1[0m HEADING-BLANKS A 
+
+  [1;36mSection After Blank Lines[0m
+
+
+[1;32m1[0m HEADING-BLANKS B 
+
+[1;32m1[0m PAGEBREAK A <<< 
+[1;32m2[0m PAGEBREAK B 
+
+[1;32m1[0m IMAGE-MACRO A image::nonexistent.png[] 
+[1;32m2[0m IMAGE-MACRO B 
+
+[1;32m1[0m RULE-DASH A ''' 
+[1;32m2[0m RULE-DASH B 
+
+[1;32m1[0m PARASTYLE A A paragraph with a style attribute. 
+[1;32m2[0m PARASTYLE B 
+
+[1;32m1[0m SOURCE-ATTRIBUTE A 
+
+[48;5;0m                  [0m
+[48;5;0m some source text [0m
+[48;5;0m                  [0m
+
+[1;32m1[0m SOURCE-ATTRIBUTE B 
+
+[1;32m1[0m TABLE A 
+╒══════╤══════╕
+│Cell A[0m│Cell B[0m│
+╞══════╪══════╡
+│Cell C[0m│Cell D[0m│
+└──────┴──────┘
+
+
+[1;32m1[0m TABLE B 
+
+[1;32m1[0m TABLE-ATTRIBUTE A 
+┌─┬─┐
+│A[0m│B[0m│
+└─┴─┘
+
+
+[1;32m1[0m TABLE-ATTRIBUTE B 
+
+[1;32m1[0m ADMONITION A 
+
+[33;40m               [0m
+[33;40m A note block. [0m
+[33;40m               [0m
+
+[1;32m1[0m ADMONITION B 
+
+[1;32m1[0m SIDEBAR A 
+
+[38;5;14m[48;5;0m                  [0m
+[38;5;14m[48;5;0m Sidebar content. [0m
+[38;5;14m[48;5;0m                  [0m
+
+[1;32m1[0m SIDEBAR B 
+
+[1;32m1[0m PASSTHROUGH A ++++ <example>raw content</example> ++++ 
+[1;32m2[0m PASSTHROUGH B 
+
+[1;32m1[0m CONTINUATION-OPERATOR A + This paragraph is attached to the preceding list item. 
+[1;32m2[0m CONTINUATION-OPERATOR B 
+
+[1;32m1[0m CONTINUATION-COMMENT A + This paragraph follows the continuation operator. 
+[1;32m2[0m CONTINUATION-COMMENT B 
+
+[1;32m1[0m CONTINUATION-BLANKS A + 
+
+This paragraph follows the continuation operator.
+. CONTINUATION-BLANKS B
+
+
+[1;32m1[0m CONTINUATION-BLOCK A + 
+
+[48;5;0m                        [0m
+[48;5;0m attached listing block [0m
+[48;5;0m                        [0m
+
+[1;32m1[0m CONTINUATION-BLOCK B 
+
+[1;32m*[0m NESTED-PARENT A 
+ [1;32m*[0m nested child 
+[1;32m*[0m NESTED-PARENT B 
+[1;32m*[0m NESTED-NEW-LIST A 
+[1;32m*[0m NESTED-NEW-LIST B 
+
+[1;32m*[0m ASTERISK-LIST A 
+[1;32m*[0m DASH-LIST B 
+[1;32m*[0m ASTERISK-LIST C 
+
+[1;32m*[0m DASH-LIST A 
+[1;32m*[0m ASTERISK-LIST B 
+[1;32m*[0m DASH-LIST C 
+
+[1;32m*[0m UNORDERED A 
+[1;32m1[0m ORDERED B 
+[1;32m*[0m UNORDERED C 
+
+[1;32m1[0m ORDERED A 
+[1;32m*[0m UNORDERED B 
+[1;32m2[0m ORDERED C 
+
+[1;32m1[0m ORDERED-DOT A 
+ [1;32m2[0m ORDERED-NESTED B 
+[1;32m3[0m ORDERED-DOT C 
+Term A:: Description A
+Term B:: Description B
+
+
+[1;32m1[0m AFTER-DESCRIPTION A 
+[1;32m2[0m AFTER-DESCRIPTION B 
+
+[1;32m*[0m [ ] Unchecked A 
+[1;32m*[0m [x] Checked B 
+[1;32m1[0m AFTER-CHECKLIST A 
+[1;32m2[0m AFTER-CHECKLIST B 
+
+[1;32m1[0m REAL-ITEM A This line contains . a dot but does not begin with a list marker. 
+[1;32m2[0m REAL-ITEM B 
+
+[1;32m1[0m ASTERISK-TEXT A This text contains * an asterisk. 
+[1;32m2[0m ASTERISK-TEXT B 
+
+[1;32m1[0m _italic item_ 
+[1;32m2[0m *bold item* 
+[1;32m3[0m `monospace item` 
+[1;32m4[0m https://example.com[linked item] 
+:termination-test: value
+
+
+[1;32m1[0m ATTRIBUTE-REFERENCE A 
+[1;32m2[0m Attribute value: {termination-test} 
+[1;32m3[0m ATTRIBUTE-REFERENCE B 
+
+[1;32m1[0m MIXED-METADATA A 
+
+[1;32m1[0m MIXED-METADATA B 
+
+[1;32m1[0m BLANKS-METADATA A 
+
+[1;32m1[0m BLANKS-METADATA B 
+
+[1;32m1[0m METADATA-COMMENT A 
+[1;32m2[0m METADATA-COMMENT B 
+
+[1;32m1[0m COMMENT-METADATA A 
+[1;32m2[0m COMMENT-METADATA B 
+
+[1;32m1[0m METADATA-BLANK-COMMENT A 
+
+[1;32m1[0m METADATA-BLANK-COMMENT B 
+
+[1;32m1[0m METADATA-BLANKS A 
+
+[1;32m1[0m METADATA-BLANKS B 
+
+[1;32m1[0m EOF-COMMENT A 
+
+[1;32m1[0m EOF-ITEM A 
+[1;32m2[0m EOF-ITEM B [0m

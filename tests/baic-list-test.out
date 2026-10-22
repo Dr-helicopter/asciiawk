@@ -104,8 +104,6 @@ Ordinary paragraph.
 
 [1;32m*[0m A 
 [1;32m*[0m B 
-
-
 [1;32m*[0m C 
 [1;32m*[0m D 
 
@@ -113,16 +111,12 @@ Ordinary paragraph.
 
 
 [1;32m*[0m Item 
-
-
 [1;32m*[0m Another item 
 
    [1;33m17 — Whitespace-only line[0m
 
 
 [1;32m*[0m Item 
-
-
 [1;32m*[0m Next 
 
    [1;33m18 — End of file[0m
@@ -133,11 +127,11 @@ Ordinary paragraph.
 
    [1;33m19 — Ordinary leading space[0m
 
-This is not a list item. 
+This is not a list item.
 
    [1;33m20 — Several leading spaces[0m
 
-Indented text, not a list. 
+Indented text, not a list.
 
    [1;33m21 — Asterisk without a following space[0m
 
@@ -149,13 +143,11 @@ This * is ordinary text.
 
    [1;33m23 — Tab before marker[0m
 
-
-[1;32m*[0m Item after a tab 
+* Item after a tab
 
    [1;33m24 — Spaces before marker[0m
 
-
-[1;32m*[0m Indented marker 
+* Indented marker
 
 [1;35m6. Interaction with `in_paragraph`[0m
 
@@ -173,6 +165,4 @@ This * is ordinary text.
 
 
 [1;32m*[0m Item continuation 
-[1;32m*[0m Next 
-
-[0m
+[1;32m*[0m Next [0m

@@ -77,7 +77,8 @@ function parse_block_atrributes(    s, entry, key, val, quoted, eq) {
 		}
 
 		entry = substr(s, 1, RLENGTH)
-		sub(/^[^,]*,?/, "", s)   # drop the entry, junk after a closing quote, and the comma
+		# drop the entry, junk after a closing quote, and the comma
+		sub(/^[^,]*,?/, "", s)   
 
 		eq = index(entry, "=")
 		if (eq == 0) { key = entry; val = "" }
@@ -543,8 +544,6 @@ function dump_table() {
 	parse_block_atrributes()
 	block_attribute_list = ""
 
-	sub(/ *$/,"",table_items)
-
 	if ("title" in attributes) {
 		printf("%s.", style_ti)
 		if ("caption" in attributes)
@@ -555,6 +554,7 @@ function dump_table() {
 		printf("%s\n",attributes["title"] style_none)
 	}
 
+	sub(/ *$/,"",table_items)
 	if (table_items != "") {
 		parse_table(table_items, table_cel_width)
 		render_table(table_items)
@@ -674,14 +674,11 @@ in_table {
 	table_read_seccond_line = 0
 
 	if (in_list) {
-		printf("\n\n")
-		in_list = 0
+		terminate_list()
 	}
 	dump_paragraph()
 	next
 }
-
-
 
 # block detections
 # each line is a regex and a type assignment
@@ -701,17 +698,96 @@ in_table {
 	block_index=0
 
 	if (in_list) {
-		printf("\n\n")
-		in_list = 0
+		terminate_list()
+		printf("\n")
 	}
 	dump_paragraph()
 	next
 }
 
-
 # this is comment
-/^\/\/[^\/]/ { next }
+/^\/\/[^\/]/ || /^\/\/$/ { 
+	if (list_terminable) terminate_list()
+	next 
+}
 # we just pretend we did'nt see it
+
+
+# block attribute
+/^\[([[:alnum:]_.#%{,"'].*)?\]$/ {
+	if (list_terminable) terminate_list()
+	sub(/^\[/, "")
+	sub(/\]$/, "")
+
+
+	if (/^%/) { # messy way to deal with shorthand options
+		tmp = $0
+		sub(/[[:space:]]*,.*$/, "", tmp)
+		if (tmp ~ /[[:space:]]/) tmp = ""
+		
+		block_attribute_list = block_attribute_list "options=\""
+		for (i=2;i<=split(tmp, tmp_spilited, "%");i++) {
+			block_attribute_list = block_attribute_list tmp_spilited[i] ","
+		}
+		block_attribute_list = block_attribute_list "\","
+		sub(/^%[^,]*,/, "")
+	}
+	block_attribute_list = block_attribute_list  $0 ","
+	next
+}
+
+
+
+function print_ordered_list(s){
+	ordered_list_count[1]++
+	printf("\n%*s%s%d%s %s ", RLENGTH-2, "", style_li, ordered_list_count[1], style_none, $0)
+}
+
+function terminate_list() {
+	printf("\n")
+	in_list = 0
+	list_terminable = 0
+	delete ordered_list_count
+}
+
+
+in_list {
+	if (!(/^\** / || /^\- / || /^\.* / || /^[ ]*$/) && list_terminable) {
+		terminate_list()
+		printf("\n")
+	}
+}
+
+((/^\*+ / || /^\- / || /^\.+ /) && !in_paragraph) || in_list {
+	$0 = trim($0)
+
+	if ($0 == "") {
+		list_terminable = 1
+		next
+	} else {
+
+		# handle the title
+		parse_block_atrributes()
+		block_attribute_list = ""
+		if ("title" in attributes) 
+			printf("%s.%s\n", style_ti, attributes["title"] style_none)
+		delete attributes
+		delete opts_attributes
+
+
+
+		in_list = 1
+		list_terminable = 0
+		if (match($0, /(^\**|^\-) /)) {
+			sub(/(^\**|^\-) /, "")
+			printf("\n%*s%s*%s %s ", RLENGTH-2, "", style_li, style_none, $0)
+		} else if (match($0, /^\.* /)){
+			sub(/^\.* /, "")
+			print_ordered_list($0)
+		} else printf("%s ", $0)
+		next
+	}
+}
 
 
 # title 
@@ -719,24 +795,6 @@ in_table {
 	$0 = substr($0,2)
 	gsub(/"/, "\\\"", $0)
 	block_attribute_list = block_attribute_list "title=\"" trim($0) "\","
-	next
-}
-
-
-# in list
-(/^\** / && !in_paragraph) || in_list {
-	sub(/^[[:space:]]*/, "")
-	if ($0 == "") {
-		printf("\n\n")
-		in_list = 0
-		next
-	}
-	in_list = 1
-	if (match($0, /^\** /)) {
-		sub(/^\** /, "")
-		printf("\n%*s%s*%s %s ", RLENGTH-2, "", style_li, style_none, $0)
-	} else printf("%s ", $0)
-
 	next
 }
 
@@ -776,29 +834,8 @@ in_table {
 	next
 }
 
-# block attribute
-/^\[([[:alnum:]_.#%{,"'].*)?\]$/ {
-	sub(/^\[/, "")
-	sub(/\]$/, "")
-
-
-	if (/^%/) { # messy way to deal with shorthand options
-		tmp = $0
-		sub(/[[:space:]]*,.*$/, "", tmp)
-		if (tmp ~ /[[:space:]]/) tmp = ""
-		
-		block_attribute_list = block_attribute_list "options=\""
-		for (i=2;i<=split(tmp, tmp_spilited, "%");i++) {
-			block_attribute_list = block_attribute_list tmp_spilited[i] ","
-		}
-		block_attribute_list = block_attribute_list "\","
-		sub(/^%[^,]*,/, "")
-	}
-	block_attribute_list = block_attribute_list  $0 ","
-	next
-}
-
 {
+	$0 = trim($0)
 	if ($0 == "") {
 		dump_paragraph()
 		next

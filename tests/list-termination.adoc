@@ -1,0 +1,493 @@
+= List Termination Torture Test
+:toc:
+
+This opening paragraph establishes the initial document context.
+The actual tests begin below.
+
+. BASELINE A
+. BASELINE B
+
+
+. TWO BLANK LINES A
+. TWO BLANK LINES B
+
+
+
+. THREE BLANK LINES A
+. THREE BLANK LINES B
+
+
+
+
+
+
+. MANY BLANK LINES A
+. MANY BLANK LINES B
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+. MANY MORE BLANK LINES A
+. MANY MORE BLANK LINES B
+
+// CASE: comment immediately after a list item
+. COMMENT-AFTER-ITEM A
+// comment directly after item A
+. COMMENT-AFTER-ITEM B
+
+// CASE: comment separated from the item by blank lines
+. COMMENT-AFTER-BLANKS A
+
+
+// comment after blank lines
+. COMMENT-AFTER-BLANKS B
+
+// CASE: multiple comments between list items
+. MULTIPLE-COMMENTS A
+// first comment
+// second comment
+// third comment
+. MULTIPLE-COMMENTS B
+
+// CASE: comments with blank lines between them
+. COMMENT-BLANK-COMMENT A
+
+// first comment
+
+// second comment
+
+// third comment
+. COMMENT-BLANK-COMMENT B
+
+// CASE: comment before the first item of a potential list
+// leading comment
+. LEADING-COMMENT A
+. LEADING-COMMENT B
+
+// CASE: blank lines before a comment before the next item
+. BLANK-COMMENT-NEXT A
+
+
+
+// comment after a large gap
+. BLANK-COMMENT-NEXT B
+
+// CASE: comment after item, then ordinary text
+. COMMENT-THEN-TEXT A
+// comment
+ordinary paragraph after comment
+
+. COMMENT-THEN-TEXT B
+
+// CASE: ordinary text without a comment
+. TEXT-TERMINATION A
+
+ordinary paragraph
+
+. TEXT-TERMINATION B
+
+// CASE: ordinary text immediately after an item
+. TEXT-IMMEDIATE A
+ordinary paragraph immediately after item
+
+. TEXT-IMMEDIATE B
+
+// CASE: attribute entry between items
+. ATTRIBUTE-ENTRY A
+:some-attribute: some value
+. ATTRIBUTE-ENTRY B
+
+// CASE: block attribute line between items
+. BLOCK-ATTRIBUTE A
+[role="some-role"]
+. BLOCK-ATTRIBUTE B
+
+// CASE: multiple block attributes
+. MULTIPLE-ATTRIBUTES A
+[role="one"]
+[.two]
+# MULTIPLE-ATTRIBUTES B
+
+// CASE: block attribute with blank lines around it
+. ATTRIBUTE-BLANKS A
+
+
+[role="some-role"]
+
+
+. ATTRIBUTE-BLANKS B
+
+// CASE: title between items
+. TITLE-BEFORE A
+.Title attached to the next block
+. TITLE-BEFORE B
+
+// CASE: title with blank lines before it
+. TITLE-BLANKS A
+
+
+.Title after blank lines
+. TITLE-BLANKS B
+
+// CASE: title after a comment
+. TITLE-COMMENT A
+// a comment
+.Title after comment
+. TITLE-COMMENT B
+
+// CASE: comment before title
+. COMMENT-TITLE A
+// a comment before title
+.Title after comment
+. COMMENT-TITLE B
+
+// CASE: block anchor between items
+. ANCHOR A
+[[some-anchor]]
+. ANCHOR B
+
+// CASE: block ID shorthand
+. ID-SHORTHAND A
+[#some-id]
+. ID-SHORTHAND B
+
+// CASE: horizontal rule
+. HRULE A
+
+'''
+
+. HRULE B
+
+// CASE: literal block delimiter
+. LITERAL-DELIMITER A
+----
+literal block content
+----
+. LITERAL-DELIMITER B
+
+// CASE: listing block delimiter
+. LISTING-DELIMITER A
+....
+listing block content
+....
+. LISTING-DELIMITER B
+
+// CASE: example block delimiter
+. EXAMPLE-DELIMITER A
+====
+example block content
+====
+. EXAMPLE-DELIMITER B
+
+// CASE: open block delimiter
+. OPEN-DELIMITER A
+--
+open block content
+--
+. OPEN-DELIMITER B
+
+// CASE: quote block delimiter
+. QUOTE-DELIMITER A
+____
+quoted content
+____
+. QUOTE-DELIMITER B
+
+// CASE: comment block
+. COMMENT-BLOCK A
+////
+comment block content
+////
+. COMMENT-BLOCK B
+
+== mark
+// CASE: single-line comment block-like sequence
+. SLASH-COMMENT A
+//
+. SLASH-COMMENT B
+
+// CASE: comment after a blank line, followed by item
+. COMMENT-GAP-ITEM A
+
+//
+. COMMENT-GAP-ITEM B
+
+// CASE: several comments after a blank line
+. COMMENTS-GAP-ITEM A
+
+
+// comment one
+// comment two
+// comment three
+. COMMENTS-GAP-ITEM B
+
+// CASE: heading at level 1
+. HEADING-LEVEL-1 A
+= A New Document Title
+. HEADING-LEVEL-1 B
+
+// CASE: heading at level 2
+. HEADING-LEVEL-2 A
+== A Section
+. HEADING-LEVEL-2 B
+
+// CASE: heading at level 3
+. HEADING-LEVEL-3 A
+=== A Subsection
+. HEADING-LEVEL-3 B
+
+// CASE: heading preceded by a comment
+. HEADING-COMMENT A
+// comment before heading
+== Section After Comment
+. HEADING-COMMENT B
+
+// CASE: heading preceded by many blank lines
+. HEADING-BLANKS A
+
+
+
+
+
+
+
+== Section After Blank Lines
+. HEADING-BLANKS B
+
+// CASE: page break macro
+. PAGEBREAK A
+<<<
+. PAGEBREAK B
+
+// CASE: image macro
+. IMAGE-MACRO A
+image::nonexistent.png[]
+. IMAGE-MACRO B
+
+// CASE: thematic break with a different delimiter
+. RULE-DASH A
+'''
+. RULE-DASH B
+
+// CASE: paragraph style attribute
+. PARASTYLE A
+[.lead]
+A paragraph with a style attribute.
+. PARASTYLE B
+
+// CASE: source block attribute
+. SOURCE-ATTRIBUTE A
+[source,text]
+----
+some source text
+----
+. SOURCE-ATTRIBUTE B
+
+// CASE: table
+. TABLE A
+|===
+|Cell A |Cell B
+
+|Cell C |Cell D
+|===
+. TABLE B
+
+// CASE: table attribute
+. TABLE-ATTRIBUTE A
+[cols="1,1"]
+|===
+|A |B
+|===
+. TABLE-ATTRIBUTE B
+
+// CASE: admonition block
+. ADMONITION A
+[NOTE]
+====
+A note block.
+====
+. ADMONITION B
+
+// CASE: sidebar block
+. SIDEBAR A
+****
+Sidebar content.
+****
+. SIDEBAR B
+
+// CASE: passthrough block
+. PASSTHROUGH A
+++++
+<example>raw content</example>
+++++
+. PASSTHROUGH B
+
+// CASE: list continuation operator
+. CONTINUATION-OPERATOR A
++
+This paragraph is attached to the preceding list item.
+. CONTINUATION-OPERATOR B
+
+// CASE: continuation operator then comment
+. CONTINUATION-COMMENT A
++
+// comment after continuation operator
+This paragraph follows the continuation operator.
+. CONTINUATION-COMMENT B
+
+// CASE: continuation operator then blank lines
+. CONTINUATION-BLANKS A
++
+
+
+This paragraph follows the continuation operator.
+. CONTINUATION-BLANKS B
+
+// CASE: continuation operator then block
+. CONTINUATION-BLOCK A
++
+----
+attached listing block
+----
+. CONTINUATION-BLOCK B
+
+// CASE: nested list then blank lines
+* NESTED-PARENT A
+** nested child
+* NESTED-PARENT B
+
+
+* NESTED-NEW-LIST A
+* NESTED-NEW-LIST B
+
+// CASE: different unordered marker
+* ASTERISK-LIST A
+- DASH-LIST B
+* ASTERISK-LIST C
+
+// CASE: another unordered marker
+- DASH-LIST A
+* ASTERISK-LIST B
+- DASH-LIST C
+
+// CASE: unordered to ordered
+* UNORDERED A
+. ORDERED B
+* UNORDERED C
+
+// CASE: ordered to unordered
+. ORDERED A
+* UNORDERED B
+. ORDERED C
+
+// CASE: different ordered marker styles
+. ORDERED-DOT A
+.. ORDERED-NESTED B
+. ORDERED-DOT C
+
+// CASE: description list
+Term A:: Description A
+Term B:: Description B
+
+. AFTER-DESCRIPTION A
+. AFTER-DESCRIPTION B
+
+// CASE: checklist
+* [ ] Unchecked A
+* [x] Checked B
+
+. AFTER-CHECKLIST A
+. AFTER-CHECKLIST B
+
+// CASE: list-like text that should not be a list item
+. REAL-ITEM A
+This line contains . a dot but does not begin with a list marker.
+. REAL-ITEM B
+
+// CASE: asterisk-like text
+. ASTERISK-TEXT A
+This text contains * an asterisk.
+. ASTERISK-TEXT B
+
+// CASE: inline formatting on item
+. _italic item_
+. *bold item*
+. `monospace item`
+. https://example.com[linked item]
+
+// CASE: attribute reference on item
+:termination-test: value
+
+. ATTRIBUTE-REFERENCE A
+. Attribute value: {termination-test}
+. ATTRIBUTE-REFERENCE B
+
+// CASE: multiple consecutive block attributes and comments
+. MIXED-METADATA A
+
+[role="alpha"]
+// comment between metadata
+[role="beta"]
+
+. MIXED-METADATA B
+
+// CASE: several blank lines followed by metadata
+. BLANKS-METADATA A
+
+
+
+
+
+
+
+[role="alpha"]
+. BLANKS-METADATA B
+
+// CASE: metadata followed by comment
+. METADATA-COMMENT A
+[role="alpha"]
+// comment after metadata
+. METADATA-COMMENT B
+
+// CASE: comment followed by metadata
+. COMMENT-METADATA A
+// comment before metadata
+[role="alpha"]
+. COMMENT-METADATA B
+
+// CASE: metadata, blank line, then comment
+. METADATA-BLANK-COMMENT A
+[role="alpha"]
+
+// comment after blank line
+. METADATA-BLANK-COMMENT B
+
+// CASE: several metadata lines with blank lines
+. METADATA-BLANKS A
+[role="alpha"]
+
+[.beta]
+
+[#gamma]
+. METADATA-BLANKS B
+
+// CASE: trailing comments at end of file
+. EOF-COMMENT A
+// final comment
+
+// CASE: final list items at end of file
+. EOF-ITEM A
+. EOF-ITEM B
