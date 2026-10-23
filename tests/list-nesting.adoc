@@ -1,0 +1,10 @@
+== Indentation test
+
+* A: outer list
+**** B: nested list
+* C: back to outer list
+. D: new list type beneath C
+** E: another nested list
+. F: return to the ordered list
+- G: switch to dash list
+* H: return to asterisk list

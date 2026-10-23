@@ -738,15 +738,27 @@ in_table {
 
 
 
-function print_ordered_list(s){
-	ordered_list_count[1]++
-	printf("\n%*s%s%d%s %s ", RLENGTH-2, "", style_li, ordered_list_count[1], style_none, $0)
+function print_ordered_list(indent, item){
+	# if we are going back down from high indent
+	# we want to delete the indents higher then current indent
+	if (list_last_indent_level > indent)
+		for (i=indent+1;i<=list_last_indent_level;i++)
+			ordered_list_count[i]=0
+	
+	list_last_indent_level = indent
+	ordered_list_count[indent]++
+	printf("\n%*s%s%d%s %s ", indent, "", style_li,
+		   ordered_list_count[indent], style_none, item)
 }
 
 function terminate_list() {
 	printf("\n")
 	in_list = 0
 	list_terminable = 0
+	list_last_indent_level = 0
+	added_indent = 0
+	list_indent_stack_size = 0
+	delete list_indent_stack
 	delete ordered_list_count
 }
 
@@ -758,7 +770,7 @@ in_list {
 	}
 }
 
-((/^\*+ / || /^\- / || /^\.+ /) && !in_paragraph) || in_list {
+((/^[ ]*\*+ / || /[ ]*^\- / || /[ ]*^\.+ /) && !in_paragraph) || in_list {
 	$0 = trim($0)
 
 	if ($0 == "") {
@@ -774,16 +786,27 @@ in_list {
 		delete attributes
 		delete opts_attributes
 
-
-
 		in_list = 1
 		list_terminable = 0
-		if (match($0, /(^\**|^\-) /)) {
-			sub(/(^\**|^\-) /, "")
-			printf("\n%*s%s*%s %s ", RLENGTH-2, "", style_li, style_none, $0)
-		} else if (match($0, /^\.* /)){
-			sub(/^\.* /, "")
-			print_ordered_list($0)
+		if (match($0, /^(\*+|\.+|[-]) /)) {
+			list_item_marker = substr($0, 0, RLENGTH)
+			sub(/^(\*+|\.+|[-]) */, "")
+			list_item_text = $0
+
+
+			if (list_item_marker in list_indent_stack)
+				indent = list_indent_stack[list_item_marker]
+			else {
+				indent = list_indent_stack_size++
+			 	list_indent_stack[list_item_marker] = indent
+			}
+			if (list_item_marker ~ /^\./) 
+				print_ordered_list(indent, list_item_text)
+			else 
+				printf("\n%*s%s*%s %s ",  indent, "", 
+				   style_li, style_none, list_item_text)
+
+
 		} else printf("%s ", $0)
 		next
 	}

@@ -253,24 +253,24 @@ This paragraph follows the continuation operator.
 [1;32m*[0m NESTED-NEW-LIST B 
 
 [1;32m*[0m ASTERISK-LIST A 
-[1;32m*[0m DASH-LIST B 
+ [1;32m*[0m DASH-LIST B 
 [1;32m*[0m ASTERISK-LIST C 
 
 [1;32m*[0m DASH-LIST A 
-[1;32m*[0m ASTERISK-LIST B 
+ [1;32m*[0m ASTERISK-LIST B 
 [1;32m*[0m DASH-LIST C 
 
 [1;32m*[0m UNORDERED A 
-[1;32m1[0m ORDERED B 
+ [1;32m1[0m ORDERED B 
 [1;32m*[0m UNORDERED C 
 
 [1;32m1[0m ORDERED A 
-[1;32m*[0m UNORDERED B 
+ [1;32m*[0m UNORDERED B 
 [1;32m2[0m ORDERED C 
 
 [1;32m1[0m ORDERED-DOT A 
- [1;32m2[0m ORDERED-NESTED B 
-[1;32m3[0m ORDERED-DOT C 
+ [1;32m1[0m ORDERED-NESTED B 
+[1;32m2[0m ORDERED-DOT C 
 Term A:: Description A
 Term B:: Description B
 
@@ -280,8 +280,8 @@ Term B:: Description B
 
 [1;32m*[0m [ ] Unchecked A 
 [1;32m*[0m [x] Checked B 
-[1;32m1[0m AFTER-CHECKLIST A 
-[1;32m2[0m AFTER-CHECKLIST B 
+ [1;32m1[0m AFTER-CHECKLIST A 
+ [1;32m2[0m AFTER-CHECKLIST B 
 
 [1;32m1[0m REAL-ITEM A This line contains . a dot but does not begin with a list marker. 
 [1;32m2[0m REAL-ITEM B 

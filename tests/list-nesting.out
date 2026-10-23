@@ -1,0 +1,11 @@
+  [1;36mIndentation test[0m
+
+
+[1;32m*[0m A: outer list 
+ [1;32m*[0m B: nested list 
+[1;32m*[0m C: back to outer list 
+  [1;32m1[0m D: new list type beneath C 
+   [1;32m*[0m E: another nested list 
+  [1;32m2[0m F: return to the ordered list 
+    [1;32m*[0m G: switch to dash list 
+[1;32m*[0m H: return to asterisk list [0m

@@ -42,10 +42,10 @@
    [1;33m07 — Deep to shallow[0m
 
 
-   [1;32m*[0m Deep 
-  [1;32m*[0m Less deep 
- [1;32m*[0m Less again 
-[1;32m*[0m Root 
+[1;32m*[0m Deep 
+ [1;32m*[0m Less deep 
+  [1;32m*[0m Less again 
+   [1;32m*[0m Root 
 
    [1;33m08 — Repeated depth[0m
 
@@ -143,11 +143,13 @@ This * is ordinary text.
 
    [1;33m23 — Tab before marker[0m
 
-* Item after a tab
+
+[1;32m*[0m Item after a tab 
 
    [1;33m24 — Spaces before marker[0m
 
-* Indented marker
+
+[1;32m*[0m Indented marker 
 
 [1;35m6. Interaction with `in_paragraph`[0m
 
