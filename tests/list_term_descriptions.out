@@ -1,0 +1,1019 @@
+[1;35mAsciiAWK List Types: Full Regression Torture Test[0m
+
+This document tests description lists, checklists, callouts, nesting,
+indentation, mixed list types, continuation, and termination.
+
+The expected result is not always that every construct renders correctly.
+Invalid cases are included to test false positives and recovery behavior.
+
+  [1;36m1. Description lists: basic syntax[0m
+
+
+[1;32mCPU:[0m 
+ Central processing unit. 
+[1;32mRAM:[0m 
+ Working memory. 
+[1;32mSSD:[0m 
+ Solid-state storage. 
+[1;32mHDD:[0m 
+ Magnetic storage. 
+[1;32mGPU:[0m 
+ Graphics processing unit. 
+
+  [1;36m2. Description lists: descriptions with punctuation[0m
+
+
+[1;32mQuestion:[0m 
+ What does the CPU do? 
+[1;32mAnswer:[0m 
+ It executes instructions. 
+[1;32mPath:[0m 
+ /usr/bin/awk 
+[1;32mCommand:[0m 
+ `awk -f render.awk input.adoc` 
+[1;32mValue:[0m 
+ 42 
+ [1;32mEmpty-looking value:[0m 
+   
+[1;32mPunctuation:[0m 
+ !@#$%^&*()_+-=[]{};:',.? 
+
+  [1;36m3. Description lists: delimiter variants[0m
+
+
+[1;32mDouble colon:[0m 
+ Description using two colons. 
+ [1;32mTriple colon:[0m 
+  Description using three colons. 
+  [1;32mFour colons:[0m 
+   Description using four colons. 
+   [1;32mFive colons:[0m 
+    Description using five colons. 
+    [1;32mSix colons:[0m 
+     Description using six colons. 
+
+  [1;36m4. Description lists: delimiter placement[0m
+
+
+[1;32mTerm:[0m 
+ Description. 
+[1;32mTerm:[0m 
+ Description with a space before the delimiter. Term::Description with no space after the delimiter. Term ::Description with no space after the delimiter. 
+[1;32mTerm:[0m 
+ Spaces around the delimiter. 
+ [1;32mTerm:[0m 
+  Description after four colons. 
+  [1;32mTerm:[0m 
+   Description after five colons. Term: Description after one colon. Term;: Description after punctuation. Term : : Description with separated colons. 
+
+  [1;36m5. Description lists: missing terms and descriptions[0m
+
+:: Description with an empty term.
+
+
+[1;32m::[0m 
+ Description with an empty term and extra delimiter. 
+ [1;32mTerm:[0m 
+   
+  [1;32mTerm:[0m 
+    
+   [1;32mTerm:[0m 
+     
+
+::
+
+::
+A normal paragraph without a delimiter.
+
+  [1;36m6. Description lists: terms that resemble other syntax[0m
+
+
+[1;32m*[0m Asterisk term:: Starts with an asterisk. 
+ [1;32m*[0m Double-asterisk term:: Starts with two asterisks. 
+  [1;32m1[0m Dot term:: Starts with a dot. 
+   [1;32m1[0m Double-dot term:: Starts with two dots. 
+    [1;32m*[0m Dash term:: Starts with a dash. 
+     [1;32m+ Plus term:[0m 
+      Starts with a plus. 
+     [1;32m[role="note"]:[0m 
+      Looks like a block attribute. 
+     [1;32m----:[0m 
+      Looks like a delimiter. 
+     [1;32m////:[0m 
+      Looks like a comment delimiter. 
+     [1;32mhttps://example.invalid:[0m 
+      Looks like a URL. 
+     [1;32m`code`:[0m 
+      Looks like inline code. 
+
+  [1;36m7. Description lists: formatting in terms[0m
+
+
+[1;32m*Bold term*:[0m 
+ Bold formatting in the term. 
+[1;32m_Italic term_:[0m 
+ Italic formatting in the term. 
+[1;32m`Code term`:[0m 
+ Monospace formatting in the term. 
+[1;32mA *partly bold* term:[0m 
+ Formatting in the middle. 
+[1;32mA _partly italic_ term:[0m 
+ Formatting in the middle. 
+[1;32mA term with `inline code`:[0m 
+ Inline code in the term. 
+[1;32mA term with https://example.invalid[link]:[0m 
+ A link in the term. 
+[1;32mA term with *bold* and _italic_:[0m 
+ Multiple formatting styles. 
+
+  [1;36m8. Description lists: formatting in descriptions[0m
+
+
+[1;32mBold:[0m 
+ Contains *bold text*. 
+[1;32mItalic:[0m 
+ Contains _italic text_. 
+[1;32mMonospace:[0m 
+ Contains `inline code`. 
+[1;32mLink:[0m 
+ Contains https://example.invalid[an example link]. 
+[1;32mCombined:[0m 
+ Contains *bold*, _italic_, and `code`. 
+[1;32mEscaped:[0m 
+ Contains \*literal asterisks\*. 
+[1;32mMarkup-looking:[0m 
+ Contains **double asterisks** and ... dots. 
+
+  [1;36m9. Description lists: multiple consecutive items[0m
+
+
+[1;32mA:[0m 
+ Item A. 
+[1;32mB:[0m 
+ Item B. 
+[1;32mC:[0m 
+ Item C. 
+[1;32mD:[0m 
+ Item D. 
+[1;32mE:[0m 
+ Item E. 
+[1;32mF:[0m 
+ Item F. 
+[1;32mG:[0m 
+ Item G. 
+[1;32mH:[0m 
+ Item H. 
+[1;32mI:[0m 
+ Item I. 
+[1;32mJ:[0m 
+ Item J. 
+
+  [1;36m10. Description lists: blank-line behavior[0m
+
+
+[1;32mAlpha:[0m 
+ Before one blank line. 
+[1;32mBeta:[0m 
+ After one blank line. 
+[1;32mGamma:[0m 
+ After multiple blank lines 
+[1;32mDelta:[0m 
+ After more blank lines. 
+[1;32mEpsilon:[0m 
+ Immediately after Delta. 
+
+  [1;36m11. Description lists: paragraph termination[0m
+
+
+[1;32mAlpha:[0m 
+ First description. 
+[1;32mBeta:[0m 
+ Second description. This is ordinary paragraph text immediately after the list. 
+
+Another paragraph follows.
+
+
+[1;32mGamma:[0m 
+ A new description list after the paragraph. 
+[1;32mDelta:[0m 
+ Another item in the new list. 
+
+  [1;36m12. Description lists: comments between items[0m
+
+
+[1;32mBefore:[0m 
+ Before a line comment. 
+[1;32mAfter:[0m 
+ After a line comment. 
+[1;32mBefore block comment:[0m 
+ Before a block comment. 
+
+
+[1;32mAfter block comment:[0m 
+ After a block comment. 
+
+  [1;36m13. Description lists: attributes between items[0m
+
+
+[1;32mBefore:[0m 
+ Before an attribute. 
+
+[1;32mAfter:[0m 
+ After an attribute. 
+[1;32mBefore multi-attribute:[0m 
+ Before multiple attributes. 
+
+[1;32mAfter multi-attribute:[0m 
+ After multiple attributes. 
+
+  [1;36m14. Description lists: titled blocks[0m
+
+[1;33m.Description list title[0m
+
+[1;32mCPU:[0m 
+ Processor. 
+[1;32mRAM:[0m 
+ Memory. 
+
+[1;33m.Another description list title[0m
+
+[1;32mSSD:[0m 
+ Storage. 
+[1;32mHDD:[0m 
+ Storage. 
+
+  [1;36m15. Description lists: headings as boundaries[0m
+
+
+[1;32mBefore:[0m 
+ Before a subsection. 
+[1;32mAnother:[0m 
+ Also before the subsection. 
+
+   [1;33mSubsection boundary[0m
+
+
+[1;32mAfter:[0m 
+ After the subsection. 
+[1;32mAnother after:[0m 
+ Another item afterward. 
+
+  [1;36m16. Description lists: nesting by indentation[0m
+
+
+[1;32mLevel one:[0m 
+ First level. 
+[1;32mLevel two:[0m 
+ Second level. 
+[1;32mLevel three:[0m 
+ Third level. 
+[1;32mLevel four:[0m 
+ Fourth level. 
+[1;32mLevel five:[0m 
+ Fifth level. 
+[1;32mBack to four:[0m 
+ Back to level four. 
+[1;32mBack to three:[0m 
+ Back to level three. 
+[1;32mBack to two:[0m 
+ Back to level two. 
+[1;32mBack to one:[0m 
+ Back to level one. 
+
+  [1;36m17. Description lists: sibling terms[0m
+
+
+[1;32mParent:[0m 
+ Parent description. 
+[1;32mChild A:[0m 
+ First child. 
+[1;32mChild B:[0m 
+ Second child. 
+[1;32mChild C:[0m 
+ Third child. 
+[1;32mGrandchild A:[0m 
+ First grandchild. 
+[1;32mGrandchild B:[0m 
+ Second grandchild. 
+[1;32mChild D:[0m 
+ Fourth child. 
+[1;32mParent sibling:[0m 
+ New parent-level item. 
+
+  [1;36m18. Description lists: mixed delimiters at different depths[0m
+
+
+[1;32mOuter:[0m 
+ Outer description. 
+ [1;32mInner:[0m 
+  Inner description. 
+  [1;32mDeeper:[0m 
+   Deeper description. 
+   [1;32mDeepest:[0m 
+    Deepest description. 
+  [1;32mBack to deeper:[0m 
+   Another deeper item. 
+ [1;32mBack to inner:[0m 
+  Another inner item. 
+[1;32mOuter sibling:[0m 
+ Another outer item. 
+
+  [1;36m19. Description lists: mixed indentation widths[0m
+
+
+[1;32mRoot:[0m 
+ Root term. 
+[1;32mChild one:[0m 
+ One leading space. 
+[1;32mChild two:[0m 
+ Two leading spaces. 
+[1;32mChild three:[0m 
+ Three leading spaces. 
+[1;32mChild four:[0m 
+ Four leading spaces. 
+[1;32mChild six:[0m 
+ Six leading spaces. 
+[1;32mChild eight:[0m 
+ Eight leading spaces. 
+[1;32mRoot again:[0m 
+ One leading space again. 
+[1;32mRoot again:[0m 
+ No leading spaces. 
+
+  [1;36m20. Description lists: tabs and spaces[0m
+
+
+[1;32mRoot:[0m 
+ Root term. 
+[1;32mTab child:[0m 
+ A term preceded by a tab. 
+[1;32mFour-space child:[0m 
+ A term preceded by four spaces. 
+[1;32mTwo-tab child:[0m 
+ A term preceded by two tabs. 
+[1;32mTwo-space child:[0m 
+ A term preceded by two spaces. 
+[1;32mRoot sibling:[0m 
+ Back at column zero. 
+
+  [1;36m21. Description lists: jumps in nesting depth[0m
+
+
+[1;32mRoot:[0m 
+ Level one. 
+[1;32mJump to deep level:[0m 
+ Large indentation jump. 
+[1;32mReturn to level two:[0m 
+ Shallower than previous item. 
+[1;32mJump deeper again:[0m 
+ Another indentation jump. 
+[1;32mRoot sibling:[0m 
+ Return to column zero. 
+
+  [1;36m22. Description lists: nested ordinary lists in descriptions[0m
+
+
+[1;32mHardware:[0m 
+ Physical components. + 
+ [1;32m*[0m CPU 
+ [1;32m*[0m RAM 
+ [1;32m*[0m Storage 
+[1;32mSoftware:[0m 
+ Programs. + 
+  [1;32m1[0m Operating system 
+  [1;32m2[0m Applications 
+  [1;32m3[0m Utilities 
+
+  [1;36m23. Description lists: nested description lists through continuation[0m
+
+
+[1;32mHardware:[0m 
+ Physical components. + 
+[1;32mCPU:[0m 
+ Processor. 
+[1;32mRAM:[0m 
+ Memory. 
+[1;32mStorage:[0m 
+ Persistent storage. 
+[1;32mSoftware:[0m 
+ Programs. + 
+[1;32mKernel:[0m 
+ Core system component. 
+[1;32mShell:[0m 
+ Command interpreter. 
+
+  [1;36m24. Description lists: continued paragraphs[0m
+
+
+[1;32mCPU:[0m 
+ Processor. + This paragraph belongs to the CPU item. 
+[1;32mRAM:[0m 
+ Memory. + This paragraph belongs to the RAM item. 
+
+  [1;36m25. Description lists: multiple continued paragraphs[0m
+
+
+[1;32mExample:[0m 
+ Item with multiple paragraphs. + First attached paragraph. 
+
++
+Second attached paragraph.
+
++
+Third attached paragraph.
+
+
+[1;32mNext example:[0m 
+ Another item. 
+
+  [1;36m26. Description lists: continued literal blocks[0m
+
+
+[1;32mCode:[0m 
+ A literal block follows. + 
+
+[48;5;0m                                           [0m
+[48;5;0m CPU:: This must remain literal text.      [0m
+[48;5;0m * This must not become an unordered item. [0m
+[48;5;0m . This must not become an ordered item.   [0m
+[48;5;0m                                           [0m
+
+[1;32mAfter code:[0m 
+ Description after the literal block. 
+
+  [1;36m27. Description lists: continued listing blocks[0m
+
+
+[1;32mScript:[0m 
+ A source listing follows. + 
+
+[48;5;0m                                           [0m
+[48;5;0m /^CPU::/ { print "not parsed as a list" } [0m
+[48;5;0m                                           [0m
+
+[1;32mAfter script:[0m 
+ Item after source listing. 
+
+  [1;36m28. Description lists: continued quote blocks[0m
+
+
+[1;32mQuote:[0m 
+ A quote follows. + 
+
+[38;5;7m[48;5;0m                             [0m
+[38;5;7m[48;5;0m CPU:: This is quoted text.  [0m
+[38;5;7m[48;5;0m * This is also quoted text. [0m
+[38;5;7m[48;5;0m                             [0m
+
+[1;32mAfter quote:[0m 
+ Item after the quote. 
+
+  [1;36m29. Description lists: multiple block types[0m
+
+
+[1;32mExample:[0m 
+ Several blocks belong to this item. + First paragraph. 
+
++
+
+[48;5;0m                 [0m
+[48;5;0m literal content [0m
+[48;5;0m                 [0m
++
+
+[38;5;7m[48;5;0m                 [0m
+[38;5;7m[48;5;0m Quoted content. [0m
+[38;5;7m[48;5;0m                 [0m
+
+[1;32mNext example:[0m 
+ New item after the blocks. 
+
+  [1;36m30. Description lists: continuation marker edge cases[0m
+
+
+[1;32mItem A:[0m 
+ Description A. + Attached paragraph A. 
+[1;32mItem B:[0m 
+ Description B. + 
+ [1;32m*[0m Nested unordered item + Another attached paragraph. 
+[1;32mItem C:[0m 
+ Description C. 
+
+  [1;36m31. Description lists: continuation without a prior item[0m
+
++
+This plus has no preceding list item.
+
+
+[1;32mCPU:[0m 
+ Processor. 
+
+  [1;36m32. Description lists: repeated continuation markers[0m
+
+
+[1;32mCPU:[0m 
+ Processor. + + Two continuation markers in succession. 
+[1;32mRAM:[0m 
+ Memory. ++ Two plus characters, not a normal continuation marker. 
+
+  [1;36m33. Description lists: block macros[0m
+
+
+[1;32mImage:[0m 
+ Image macro follows. + image::missing-image.png[placeholder] 
+[1;32mAfter image:[0m 
+ Item after the image macro. 
+
+  [1;36m34. Description lists: adjacent to tables[0m
+
+
+[1;32mBefore table:[0m 
+ Description before table. + 
+┌────┬─────────┐
+│Name[0m│Value    [0m│
+├────┼─────────┤
+│CPU [0m│Processor[0m│
+├────┼─────────┤
+│RAM [0m│Memory   [0m│
+└────┴─────────┘
+
+
+[1;32mAfter table:[0m 
+ Description after table. 
+
+  [1;36m35. Description lists: adjacent to delimited blocks[0m
+
+
+[1;32mBefore listing:[0m 
+ Before listing. 
+
+[48;5;0m                        [0m
+[48;5;0m CPU:: Literal content. [0m
+[48;5;0m                        [0m
+
+[1;32mAfter listing:[0m 
+ After listing. 
+[1;32mBefore quote:[0m 
+ Before quote. 
+
+[38;5;7m[48;5;0m                       [0m
+[38;5;7m[48;5;0m CPU:: Quoted content. [0m
+[38;5;7m[48;5;0m                       [0m
+
+[1;32mAfter quote:[0m 
+ After quote. 
+
+  [1;36m36. Description lists: end of file[0m
+
+
+[1;32mFinal term:[0m 
+ Final description. 
+ [1;32mFinal nested term:[0m 
+  Final nested description. 
+  [1;32mFinal deep term:[0m 
+   Final deep description. 
+
+  [1;36m37. Checklists: basic markers[0m
+
+
+[1;32m*[0m [ ] Unchecked task. 
+[1;32m*[0m [x] Checked task. 
+[1;32m*[0m [X] Uppercase checked task. 
+[1;32m*[0m [*] Asterisk state. 
+[1;32m*[0m [o] Letter state. 
+[1;32m*[0m [/] Slash state. 
+[1;32m*[0m [!] Exclamation state. 
+
+  [1;36m38. Checklists: mixed checked and unchecked items[0m
+
+
+[1;32m*[0m [ ] First task. 
+[1;32m*[0m [x] Second task. 
+[1;32m*[0m [ ] Third task. 
+[1;32m*[0m [X] Fourth task. 
+[1;32m*[0m [ ] Fifth task. 
+[1;32m*[0m Sixth item without a checkbox. 
+[1;32m*[0m [ ] Seventh task. 
+
+  [1;36m39. Checklists: nested levels[0m
+
+
+[1;32m*[0m [ ] Level one unchecked. 
+ [1;32m*[0m [x] Level two checked. 
+  [1;32m*[0m [ ] Level three unchecked. 
+   [1;32m*[0m [x] Level four checked. 
+  [1;32m*[0m [ ] Back to level three. 
+ [1;32m*[0m [ ] Back to level two. 
+[1;32m*[0m [x] Back to level one. 
+
+  [1;36m40. Checklists: checkbox spacing[0m
+
+
+[1;32m*[0m [ ] Normal unchecked. 
+[1;32m*[0m [x] Normal checked. 
+[1;32m*[0m [  ] Two spaces inside the checkbox. 
+[1;32m*[0m [ x ] Spaces around the x. 
+[1;32m*[0m [ ]No space after the checkbox. 
+[1;32m*[0m [ ]  Two spaces after the checkbox. *[ ] Marker attached to the asterisk. 
+[1;32m*[0m [ ] Checkbox preceded by a tab. 
+
+  [1;36m41. Checklists: checkbox-like text elsewhere[0m
+
+This is not a checklist:
+[ ] Plain unchecked-looking text.
+[x] Plain checked-looking text.
+The phrase [x] inside a paragraph should not start a list.
+
+  [1;36m42. Checklists: continuation paragraphs[0m
+
+
+[1;32m*[0m [ ] Task with attached details. + This paragraph explains the task. 
+[1;32m*[0m [x] Completed task with attached details. + Completion notes go here. 
+
+  [1;36m43. Checklists: list type transitions[0m
+
+
+[1;32m*[0m [ ] Unchecked task. 
+ [1;32m1[0m Ordered item after checklist. 
+[1;32m*[0m [x] Checked task after ordered item. 
+  [1;32mCPU:[0m 
+   Description after checklist. 
+   [1;32m*[0m Dash item after description list. 
+
+  [1;36m44. Checklists: descriptions as task details[0m
+
+
+[1;32m*[0m [ ] CPU:: Verify processor support. 
+[1;32m*[0m [x] RAM:: Verify memory requirements. 
+[1;32m*[0m [ ] Storage:: Confirm disk space. 
+[1;32m*[0m [x] Network:: Confirm connectivity. 
+
+  [1;36m45. Callouts: basic list[0m
+
+<1> First callout.
+<2> Second callout.
+<3> Third callout.
+
+  [1;36m46. Callouts: numeric edge cases[0m
+
+<0> Zero.
+<1> One.
+<2> Two.
+<9> Nine.
+<10> Ten.
+<99> Ninety-nine.
+<100> One hundred.
+
+  [1;36m47. Callouts: malformed markers[0m
+
+<> Empty marker.
+< > Space-only marker.
+<-1> Negative number.
+<1.5> Decimal number.
+<1x> Number with trailing letter.
+<x1> Letter before number.
+<abc> Letters only.
+<<1>> Double angle brackets.
+<1 First callout without closing bracket.
+Second callout without opening bracket 2>.
+
+  [1;36m48. Callouts: source-code integration[0m
+
+[48;5;0m                                   [0m
+[48;5;0m int main(void) {                  [0m
+[48;5;0m     int answer = 42; // <1>       [0m
+[48;5;0m     int other = 10;  // <2>       [0m
+[48;5;0m     return answer + other; // <3> [0m
+[48;5;0m }                                 [0m
+[48;5;0m                                   [0m
+<1> Declare the first integer.
+<2> Declare the second integer.
+<3> Return their sum.
+
+  [1;36m49. Callouts: other source languages[0m
+
+[48;5;0m                     [0m
+[48;5;0m name = "Ada"  # <1> [0m
+[48;5;0m age = 36      # <2> [0m
+[48;5;0m print(name)   # <3> [0m
+[48;5;0m                     [0m
+<1> Assign a name.
+<2> Assign an age.
+<3> Print the name.
+
+  [1;36m50. Callouts: missing or reordered numbers[0m
+
+<1> First callout.
+<3> Third callout without a second.
+<2> Second callout appears late.
+<1> Duplicate number one.
+<4> Number four.
+
+  [1;36m51. Callouts: adjacency to other list types[0m
+
+
+[1;32m*[0m Ordinary unordered item. 
+[1;32m*[0m Another unordered item. 
+
+<1> Callout item one.
+<2> Callout item two.
+
+
+[1;32m1[0m Ordinary ordered item. 
+[1;32m2[0m Another ordered item. 
+ [1;32mCPU:[0m 
+  Description list item. 
+
+  [1;36m52. Callouts: content formatting[0m
+
+<1> Callout with *bold text*.
+<2> Callout with _italic text_.
+<3> Callout with `inline code`.
+<4> Callout with https://example.invalid[link].
+
+  [1;36m53. Mixed lists: type switches at one level[0m
+
+
+[1;32m*[0m Asterisk item A. 
+ [1;32m1[0m Ordered item B. 
+  [1;32m*[0m Dash item C. 
+[1;32m*[0m Asterisk item D. 
+ [1;32m2[0m Ordered item E. 
+   [1;32mCPU:[0m 
+    Description item F. 
+[1;32m*[0m Asterisk item G. 
+
+  [1;36m54. Mixed lists: nested transitions[0m
+
+
+[1;32m*[0m Outer unordered. 
+ [1;32m1[0m Ordered item inside current hierarchy. 
+  [1;32m*[0m Asterisk item with depth two. 
+   [1;32m1[0m Ordered item with depth two. 
+    [1;32mCPU:[0m 
+     Description item. 
+    [1;32mNested term:[0m 
+     Nested description. 
+     [1;32m*[0m Dash item. 
+[1;32m*[0m Asterisk item. 
+ [1;32m2[0m Ordered item. 
+
+  [1;36m55. Mixed lists: rapid depth changes[0m
+
+
+[1;32m*[0m A 
+ [1;32m*[0m Deep asterisk item 
+  [1;32m*[0m Shallower asterisk marker 
+   [1;32m*[0m Deeper asterisk marker 
+[1;32m*[0m Return to one asterisk 
+    [1;32m1[0m Deep ordered marker 
+     [1;32m1[0m Return to one dot -- Dash marker with two dashes 
+      [1;32m*[0m Single dash marker 
+       [1;32mTerm:[0m 
+        Description item. 
+       [1;32mNested term:[0m 
+        Nested description. 
+
+  [1;36m56. Mixed lists: blank lines between types[0m
+
+
+[1;32m*[0m Unordered item A. 
+ [1;32m1[0m Ordered item B. 
+  [1;32m*[0m Dash item C. 
+   [1;32mCPU:[0m 
+    Description item D. 
+[1;32m*[0m Unordered item E. 
+
+  [1;36m57. Mixed lists: comments between types[0m
+
+
+[1;32m*[0m Unordered item. 
+ [1;32m1[0m Ordered item. 
+  [1;32mCPU:[0m 
+   Description item. 
+
+  [1;36m58. Mixed lists: attributes between types[0m
+
+
+[1;32m*[0m Unordered item. 
+
+[1;32m1[0m Ordered item after attribute. 
+
+[1;32mCPU:[0m 
+ Description item after attribute. 
+
+  [1;36m59. Mixed lists: heading boundaries[0m
+
+
+[1;32m*[0m Unordered item. 
+ [1;32m1[0m Ordered item. 
+
+   [1;33mHeading[0m
+
+
+[1;32mCPU:[0m 
+ Description item after heading. 
+ [1;32m*[0m Unordered item after heading. 
+
+  [1;36m60. Marker near misses: unordered and ordered lists[0m
+
+
+[1;32m*[0m Valid asterisk item. *No space after asterisk. 
+ [1;32m*[0m Valid nested asterisk item. **No space after double asterisk. 
+  [1;32m1[0m Valid ordered item. .No space after dot. 
+   [1;32m1[0m Valid nested ordered item. ..No space after double dot. 
+    [1;32m*[0m Valid dash item. -Not a valid dash item. --Not a valid nested dash item. 
+
+  [1;36m61. Marker near misses: description lists[0m
+
+
+[1;32mCPU:[0m 
+ Valid description. CPU: One colon only. CPU : : Separated colons. 
+ [1;32mCPU:[0m 
+  Triple-colon delimiter. 
+  [1;32mCPU:[0m 
+   Four-colon delimiter. 
+   [1;32mCPU:[0m 
+    Space before delimiter. :: Empty term. No delimiter here. 
+
+  [1;36m62. Whitespace: leading spaces[0m
+
+
+[1;32m*[0m Item at column zero. 
+[1;32m*[0m Item with one leading space. 
+[1;32m*[0m Item with two leading spaces. 
+[1;32m*[0m Item with three leading spaces. 
+[1;32m*[0m Item with four leading spaces. 
+[1;32m*[0m Back to column zero. 
+
+  [1;36m63. Whitespace: trailing spaces[0m
+
+
+[1;32mCPU:[0m 
+ Description with trailing spaces. 
+[1;32mRAM:[0m 
+ Description with no trailing spaces. 
+ [1;32m*[0m Unordered item with trailing spaces. 
+  [1;32m1[0m Ordered item with trailing spaces. 
+
+  [1;36m64. Whitespace: tabs and mixed whitespace[0m
+
+
+[1;32m*[0m Item at column zero. 
+[1;32m*[0m Item preceded by a tab. 
+[1;32m*[0m Item preceded by three spaces. 
+[1;32m*[0m Item preceded by two tabs. 
+[1;32m*[0m Item preceded by two spaces. 
+[1;32m*[0m Back at column zero. 
+
+  [1;36m65. Deep nesting stress test[0m
+
+
+[1;32m*[0m Level 1 
+ [1;32m*[0m Level 2 
+  [1;32m*[0m Level 3 
+   [1;32m*[0m Level 4 
+    [1;32m*[0m Level 5 
+     [1;32m*[0m Level 6 
+      [1;32m*[0m Level 7 
+       [1;32m*[0m Level 8 
+        [1;32m*[0m Level 9 
+         [1;32m*[0m Level 10 
+        [1;32m*[0m Back to level 9 
+       [1;32m*[0m Back to level 8 
+      [1;32m*[0m Back to level 7 
+     [1;32m*[0m Back to level 6 
+    [1;32m*[0m Back to level 5 
+   [1;32m*[0m Back to level 4 
+  [1;32m*[0m Back to level 3 
+ [1;32m*[0m Back to level 2 
+[1;32m*[0m Back to level 1 
+
+  [1;36m66. Deep description nesting stress test[0m
+
+
+[1;32mL1:[0m 
+ Description level 1. 
+[1;32mL2:[0m 
+ Description level 2. 
+[1;32mL3:[0m 
+ Description level 3. 
+[1;32mL4:[0m 
+ Description level 4. 
+[1;32mL5:[0m 
+ Description level 5. 
+[1;32mL6:[0m 
+ Description level 6. 
+[1;32mBack to L5:[0m 
+ Return to level 5. 
+[1;32mBack to L4:[0m 
+ Return to level 4. 
+[1;32mBack to L3:[0m 
+ Return to level 3. 
+[1;32mBack to L2:[0m 
+ Return to level 2. 
+[1;32mBack to L1:[0m 
+ Return to level 1. 
+
+  [1;36m67. Consecutive list blocks with different types[0m
+
+
+[1;32m*[0m Unordered A 
+[1;32m*[0m Unordered B 
+ [1;32m1[0m Ordered A 
+ [1;32m2[0m Ordered B 
+  [1;32mCPU:[0m 
+   Description A 
+  [1;32mRAM:[0m 
+   Description B 
+[1;32m*[0m Unordered C 
+[1;32m*[0m Unordered D 
+
+  [1;36m68. Lists after ordinary paragraphs[0m
+
+This paragraph precedes an unordered list.
+
+
+[1;32m*[0m First item. 
+[1;32m*[0m Second item. 
+
+This paragraph precedes an ordered list.
+
+
+[1;32m1[0m First ordered item. 
+[1;32m2[0m Second ordered item. 
+
+This paragraph precedes a description list.
+
+
+[1;32mCPU:[0m 
+ Processor. 
+[1;32mRAM:[0m 
+ Memory. 
+
+  [1;36m69. Lists interrupted by literal content[0m
+
+
+[1;32m*[0m Before literal block. 
+
+[48;5;0m                                   [0m
+[48;5;0m * Literal asterisk.               [0m
+[48;5;0m . Literal dot.                    [0m
+[48;5;0m CPU:: Literal description syntax. [0m
+[48;5;0m                                   [0m
+
+[1;32m*[0m After literal block. 
+
+  [1;36m70. Lists interrupted by block comments[0m
+
+
+[1;32m*[0m Before comment. 
+
+
+[1;32m*[0m After comment. 
+
+  [1;36m71. List terminators: blank lines and paragraphs[0m
+
+
+[1;32m*[0m Item A 
+[1;32m*[0m Item B 
+
+A paragraph that may terminate the list.
+
+
+[1;32m*[0m Item C 
+
+  [1;36m72. List terminators: block attributes[0m
+
+
+[1;32m*[0m Item A 
+
+[1;32m*[0m Item B 
+
+  [1;36m73. List terminators: headings and delimiters[0m
+
+
+[1;32m*[0m Item before heading. 
+
+   [1;33mHeading boundary[0m
+
+
+[1;32m*[0m Item after heading. 
+[1;32m*[0m Item before delimiter. 
+
+[48;5;0m               [0m
+[48;5;0m literal block [0m
+[48;5;0m               [0m
+
+[1;32m*[0m Item after delimiter. 
+
+  [1;36m74. End-of-file termination[0m
+
+
+[1;32m*[0m Final unordered item. 
+ [1;32m*[0m Final nested unordered item. 
+  [1;32m1[0m Final ordered item. 
+   [1;32mCPU:[0m 
+    Final description item. 
+    [1;32mNested final term:[0m 
+     Final nested description. [0m

@@ -764,13 +764,15 @@ function terminate_list() {
 
 
 in_list {
-	if (!(/^\** / || /^\- / || /^\.* / || /^[ ]*$/) && list_terminable) {
+	if (!(/^\** / || /^\- / || /^\.* / || /^[ ]*$/ || /^.+::+($|[ ])/) && 
+			list_terminable) {
 		terminate_list()
 		printf("\n")
 	}
 }
 
-((/^[ ]*\*+ / || /[ ]*^\- / || /[ ]*^\.+ /) && !in_paragraph) || in_list {
+((/^[ ]*\*+ / || /[ ]*^\- / || /[ ]*^\.+ / || /^.+::+($|[ ])/) && 
+		!in_paragraph) || in_list {
 	$0 = trim($0)
 
 	if ($0 == "") {
@@ -788,6 +790,8 @@ in_list {
 
 		in_list = 1
 		list_terminable = 0
+		
+		# normal lists 
 		if (match($0, /^(\*+|\.+|[-]) /)) {
 			list_item_marker = substr($0, 0, RLENGTH)
 			sub(/^(\*+|\.+|[-]) */, "")
@@ -806,6 +810,28 @@ in_list {
 				printf("\n%*s%s*%s %s ",  indent, "", 
 				   style_li, style_none, list_item_text)
 
+
+		# descrion list
+		} else if (match($0, /^.+::+($|[ ])/)){
+			# it cuts off the description first
+			# then it seperates the descrion indent from the rest
+			match($0, /^.([^:]|:[^:])*::+/)
+			list_item_description = trim(substr($0, RLENGTH+1))
+			match(substr($0, 0, RLENGTH), /.:*$/)
+			list_item_marker = substr($0, RSTART+1, RLENGTH)
+			list_item_term = trim(substr($0, 0 , RSTART))
+
+
+			if (list_item_marker in list_indent_stack)
+				indent = list_indent_stack[list_item_marker]
+			else {
+				indent = list_indent_stack_size++
+			 	list_indent_stack[list_item_marker] = indent
+			}
+
+			printf("\n%*s%s%s:%s ",  indent, "", 
+			   style_li, list_item_term, style_none)
+			printf("\n%*s%s ",  indent+1, "", list_item_description)
 
 		} else printf("%s ", $0)
 		next

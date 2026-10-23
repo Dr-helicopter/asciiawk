@@ -271,12 +271,13 @@ This paragraph follows the continuation operator.
 [1;32m1[0m ORDERED-DOT A 
  [1;32m1[0m ORDERED-NESTED B 
 [1;32m2[0m ORDERED-DOT C 
-Term A:: Description A
-Term B:: Description B
 
-
-[1;32m1[0m AFTER-DESCRIPTION A 
-[1;32m2[0m AFTER-DESCRIPTION B 
+[1;32mTerm A:[0m 
+ Description A 
+[1;32mTerm B:[0m 
+ Description B 
+ [1;32m1[0m AFTER-DESCRIPTION A 
+ [1;32m2[0m AFTER-DESCRIPTION B 
 
 [1;32m*[0m [ ] Unchecked A 
 [1;32m*[0m [x] Checked B 

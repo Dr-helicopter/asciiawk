@@ -1,0 +1,828 @@
+
+= AsciiAWK List Types: Full Regression Torture Test
+
+This document tests description lists, checklists, callouts, nesting,
+indentation, mixed list types, continuation, and termination.
+
+The expected result is not always that every construct renders correctly.
+Invalid cases are included to test false positives and recovery behavior.
+
+== 1. Description lists: basic syntax
+
+CPU:: Central processing unit.
+RAM:: Working memory.
+SSD:: Solid-state storage.
+HDD:: Magnetic storage.
+GPU:: Graphics processing unit.
+
+== 2. Description lists: descriptions with punctuation
+
+Question:: What does the CPU do?
+Answer:: It executes instructions.
+Path:: /usr/bin/awk
+Command:: `awk -f render.awk input.adoc`
+Value:: 42
+Empty-looking value:: 
+Punctuation:: !@#$%^&*()_+-=[]{};:',.?
+
+== 3. Description lists: delimiter variants
+
+Double colon:: Description using two colons.
+Triple colon::: Description using three colons.
+Four colons:::: Description using four colons.
+Five colons::::: Description using five colons.
+Six colons:::::: Description using six colons.
+
+== 4. Description lists: delimiter placement
+
+Term:: Description.
+Term :: Description with a space before the delimiter.
+Term::Description with no space after the delimiter.
+Term ::Description with no space after the delimiter.
+Term   ::   Spaces around the delimiter.
+Term:::: Description after four colons.
+Term::::: Description after five colons.
+Term: Description after one colon.
+Term;: Description after punctuation.
+Term : : Description with separated colons.
+
+== 5. Description lists: missing terms and descriptions
+
+:: Description with an empty term.
+
+::: Description with an empty term and extra delimiter.
+
+Term::
+
+Term::: 
+
+Term:::: 
+
+::
+
+:: 
+A normal paragraph without a delimiter.
+
+== 6. Description lists: terms that resemble other syntax
+
+* Asterisk term:: Starts with an asterisk.
+** Double-asterisk term:: Starts with two asterisks.
+. Dot term:: Starts with a dot.
+.. Double-dot term:: Starts with two dots.
+- Dash term:: Starts with a dash.
++ Plus term:: Starts with a plus.
+[role="note"]:: Looks like a block attribute.
+----:: Looks like a delimiter.
+////:: Looks like a comment delimiter.
+https://example.invalid:: Looks like a URL.
+`code`:: Looks like inline code.
+
+== 7. Description lists: formatting in terms
+
+*Bold term*:: Bold formatting in the term.
+_Italic term_:: Italic formatting in the term.
+`Code term`:: Monospace formatting in the term.
+A *partly bold* term:: Formatting in the middle.
+A _partly italic_ term:: Formatting in the middle.
+A term with `inline code`:: Inline code in the term.
+A term with https://example.invalid[link]:: A link in the term.
+A term with *bold* and _italic_:: Multiple formatting styles.
+
+== 8. Description lists: formatting in descriptions
+
+Bold:: Contains *bold text*.
+Italic:: Contains _italic text_.
+Monospace:: Contains `inline code`.
+Link:: Contains https://example.invalid[an example link].
+Combined:: Contains *bold*, _italic_, and `code`.
+Escaped:: Contains \*literal asterisks\*.
+Markup-looking:: Contains **double asterisks** and ... dots.
+
+== 9. Description lists: multiple consecutive items
+
+A:: Item A.
+B:: Item B.
+C:: Item C.
+D:: Item D.
+E:: Item E.
+F:: Item F.
+G:: Item G.
+H:: Item H.
+I:: Item I.
+J:: Item J.
+
+== 10. Description lists: blank-line behavior
+
+Alpha:: Before one blank line.
+
+Beta:: After one blank line.
+
+
+Gamma:: After multiple blank lines
+
+
+
+Delta:: After more blank lines.
+Epsilon:: Immediately after Delta.
+
+== 11. Description lists: paragraph termination
+
+Alpha:: First description.
+Beta:: Second description.
+This is ordinary paragraph text immediately after the list.
+
+Another paragraph follows.
+
+Gamma:: A new description list after the paragraph.
+Delta:: Another item in the new list.
+
+== 12. Description lists: comments between items
+
+Before:: Before a line comment.
+// This comment is between description items.
+After:: After a line comment.
+
+Before block comment:: Before a block comment.
+////
+This comment spans multiple lines.
+It contains CPU:: text that must not become a list item.
+////
+After block comment:: After a block comment.
+
+== 13. Description lists: attributes between items
+
+Before:: Before an attribute.
+
+[role="note"]
+After:: After an attribute.
+
+Before multi-attribute:: Before multiple attributes.
+
+[role="note",options="interactive"]
+After multi-attribute:: After multiple attributes.
+
+== 14. Description lists: titled blocks
+
+.Description list title
+CPU:: Processor.
+RAM:: Memory.
+
+.Another description list title
+SSD:: Storage.
+HDD:: Storage.
+
+== 15. Description lists: headings as boundaries
+
+Before:: Before a subsection.
+Another:: Also before the subsection.
+
+=== Subsection boundary
+
+After:: After the subsection.
+Another after:: Another item afterward.
+
+== 16. Description lists: nesting by indentation
+
+Level one:: First level.
+  Level two:: Second level.
+    Level three:: Third level.
+      Level four:: Fourth level.
+        Level five:: Fifth level.
+      Back to four:: Back to level four.
+    Back to three:: Back to level three.
+  Back to two:: Back to level two.
+Back to one:: Back to level one.
+
+== 17. Description lists: sibling terms
+
+Parent:: Parent description.
+  Child A:: First child.
+  Child B:: Second child.
+  Child C:: Third child.
+    Grandchild A:: First grandchild.
+    Grandchild B:: Second grandchild.
+  Child D:: Fourth child.
+Parent sibling:: New parent-level item.
+
+== 18. Description lists: mixed delimiters at different depths
+
+Outer:: Outer description.
+  Inner::: Inner description.
+    Deeper:::: Deeper description.
+      Deepest::::: Deepest description.
+    Back to deeper:::: Another deeper item.
+  Back to inner::: Another inner item.
+Outer sibling:: Another outer item.
+
+== 19. Description lists: mixed indentation widths
+
+Root:: Root term.
+ Child one:: One leading space.
+  Child two:: Two leading spaces.
+   Child three:: Three leading spaces.
+    Child four:: Four leading spaces.
+      Child six:: Six leading spaces.
+        Child eight:: Eight leading spaces.
+ Root again:: One leading space again.
+Root again:: No leading spaces.
+
+== 20. Description lists: tabs and spaces
+
+Root:: Root term.
+	Tab child:: A term preceded by a tab.
+    Four-space child:: A term preceded by four spaces.
+		Two-tab child:: A term preceded by two tabs.
+  Two-space child:: A term preceded by two spaces.
+Root sibling:: Back at column zero.
+
+== 21. Description lists: jumps in nesting depth
+
+Root:: Level one.
+        Jump to deep level:: Large indentation jump.
+  Return to level two:: Shallower than previous item.
+            Jump deeper again:: Another indentation jump.
+Root sibling:: Return to column zero.
+
+== 22. Description lists: nested ordinary lists in descriptions
+
+Hardware:: Physical components.
++
+* CPU
+* RAM
+* Storage
+
+Software:: Programs.
++
+. Operating system
+. Applications
+. Utilities
+
+== 23. Description lists: nested description lists through continuation
+
+Hardware:: Physical components.
++
+CPU:: Processor.
+RAM:: Memory.
+Storage:: Persistent storage.
+
+Software:: Programs.
++
+Kernel:: Core system component.
+Shell:: Command interpreter.
+
+== 24. Description lists: continued paragraphs
+
+CPU:: Processor.
++
+This paragraph belongs to the CPU item.
+
+RAM:: Memory.
++
+This paragraph belongs to the RAM item.
+
+== 25. Description lists: multiple continued paragraphs
+
+Example:: Item with multiple paragraphs.
++
+First attached paragraph.
+
++
+Second attached paragraph.
+
++
+Third attached paragraph.
+
+Next example:: Another item.
+
+== 26. Description lists: continued literal blocks
+
+Code:: A literal block follows.
++
+----
+CPU:: This must remain literal text.
+* This must not become an unordered item.
+. This must not become an ordered item.
+----
+
+After code:: Description after the literal block.
+
+== 27. Description lists: continued listing blocks
+
+Script:: A source listing follows.
++
+[source,awk]
+----
+/^CPU::/ { print "not parsed as a list" }
+----
+
+After script:: Item after source listing.
+
+== 28. Description lists: continued quote blocks
+
+Quote:: A quote follows.
++
+____
+CPU:: This is quoted text.
+* This is also quoted text.
+____
+
+After quote:: Item after the quote.
+
+== 29. Description lists: multiple block types
+
+Example:: Several blocks belong to this item.
++
+First paragraph.
+
++
+----
+literal content
+----
+
++
+____
+Quoted content.
+____
+
+Next example:: New item after the blocks.
+
+== 30. Description lists: continuation marker edge cases
+
+Item A:: Description A.
++
+Attached paragraph A.
+
+Item B:: Description B.
++
+* Nested unordered item
++
+Another attached paragraph.
+
+Item C:: Description C.
+
+== 31. Description lists: continuation without a prior item
+
++
+This plus has no preceding list item.
+
+CPU:: Processor.
+
+== 32. Description lists: repeated continuation markers
+
+CPU:: Processor.
++
++
+Two continuation markers in succession.
+
+RAM:: Memory.
+++
+Two plus characters, not a normal continuation marker.
+
+== 33. Description lists: block macros
+
+Image:: Image macro follows.
++
+image::missing-image.png[placeholder]
+
+After image:: Item after the image macro.
+
+== 34. Description lists: adjacent to tables
+
+Before table:: Description before table.
++
+|===
+|Name |Value
+|CPU |Processor
+|RAM |Memory
+|===
+
+After table:: Description after table.
+
+== 35. Description lists: adjacent to delimited blocks
+
+Before listing:: Before listing.
+----
+CPU:: Literal content.
+----
+After listing:: After listing.
+
+Before quote:: Before quote.
+____
+CPU:: Quoted content.
+____
+After quote:: After quote.
+
+== 36. Description lists: end of file
+
+Final term:: Final description.
+  Final nested term::: Final nested description.
+    Final deep term:::: Final deep description.
+
+== 37. Checklists: basic markers
+
+* [ ] Unchecked task.
+* [x] Checked task.
+* [X] Uppercase checked task.
+* [*] Asterisk state.
+* [o] Letter state.
+* [/] Slash state.
+* [!] Exclamation state.
+
+== 38. Checklists: mixed checked and unchecked items
+
+* [ ] First task.
+* [x] Second task.
+* [ ] Third task.
+* [X] Fourth task.
+* [ ] Fifth task.
+* Sixth item without a checkbox.
+* [ ] Seventh task.
+
+== 39. Checklists: nested levels
+
+* [ ] Level one unchecked.
+** [x] Level two checked.
+*** [ ] Level three unchecked.
+**** [x] Level four checked.
+*** [ ] Back to level three.
+** [ ] Back to level two.
+* [x] Back to level one.
+
+== 40. Checklists: checkbox spacing
+
+* [ ] Normal unchecked.
+* [x] Normal checked.
+* [  ] Two spaces inside the checkbox.
+* [ x ] Spaces around the x.
+* [ ]No space after the checkbox.
+* [ ]  Two spaces after the checkbox.
+*[ ] Marker attached to the asterisk.
+*	[ ] Checkbox preceded by a tab.
+
+== 41. Checklists: checkbox-like text elsewhere
+
+This is not a checklist:
+[ ] Plain unchecked-looking text.
+[x] Plain checked-looking text.
+The phrase [x] inside a paragraph should not start a list.
+
+== 42. Checklists: continuation paragraphs
+
+* [ ] Task with attached details.
++
+This paragraph explains the task.
+
+* [x] Completed task with attached details.
++
+Completion notes go here.
+
+== 43. Checklists: list type transitions
+
+* [ ] Unchecked task.
+. Ordered item after checklist.
+* [x] Checked task after ordered item.
+CPU:: Description after checklist.
+- Dash item after description list.
+
+== 44. Checklists: descriptions as task details
+
+* [ ] CPU:: Verify processor support.
+* [x] RAM:: Verify memory requirements.
+* [ ] Storage:: Confirm disk space.
+* [x] Network:: Confirm connectivity.
+
+== 45. Callouts: basic list
+
+<1> First callout.
+<2> Second callout.
+<3> Third callout.
+
+== 46. Callouts: numeric edge cases
+
+<0> Zero.
+<1> One.
+<2> Two.
+<9> Nine.
+<10> Ten.
+<99> Ninety-nine.
+<100> One hundred.
+
+== 47. Callouts: malformed markers
+
+<> Empty marker.
+< > Space-only marker.
+<-1> Negative number.
+<1.5> Decimal number.
+<1x> Number with trailing letter.
+<x1> Letter before number.
+<abc> Letters only.
+<<1>> Double angle brackets.
+<1 First callout without closing bracket.
+Second callout without opening bracket 2>.
+
+== 48. Callouts: source-code integration
+
+[source,c]
+----
+int main(void) {
+    int answer = 42; // <1>
+    int other = 10;  // <2>
+    return answer + other; // <3>
+}
+----
+<1> Declare the first integer.
+<2> Declare the second integer.
+<3> Return their sum.
+
+== 49. Callouts: other source languages
+
+[source,python]
+----
+name = "Ada"  # <1>
+age = 36      # <2>
+print(name)   # <3>
+----
+<1> Assign a name.
+<2> Assign an age.
+<3> Print the name.
+
+== 50. Callouts: missing or reordered numbers
+
+<1> First callout.
+<3> Third callout without a second.
+<2> Second callout appears late.
+<1> Duplicate number one.
+<4> Number four.
+
+== 51. Callouts: adjacency to other list types
+
+* Ordinary unordered item.
+* Another unordered item.
+
+<1> Callout item one.
+<2> Callout item two.
+
+. Ordinary ordered item.
+. Another ordered item.
+
+CPU:: Description list item.
+
+== 52. Callouts: content formatting
+
+<1> Callout with *bold text*.
+<2> Callout with _italic text_.
+<3> Callout with `inline code`.
+<4> Callout with https://example.invalid[link].
+
+== 53. Mixed lists: type switches at one level
+
+* Asterisk item A.
+. Ordered item B.
+- Dash item C.
+* Asterisk item D.
+. Ordered item E.
+CPU:: Description item F.
+* Asterisk item G.
+
+== 54. Mixed lists: nested transitions
+
+* Outer unordered.
+. Ordered item inside current hierarchy.
+** Asterisk item with depth two.
+.. Ordered item with depth two.
+CPU:: Description item.
+  Nested term:: Nested description.
+- Dash item.
+* Asterisk item.
+. Ordered item.
+
+== 55. Mixed lists: rapid depth changes
+
+* A
+**** Deep asterisk item
+** Shallower asterisk marker
+***** Deeper asterisk marker
+* Return to one asterisk
+... Deep ordered marker
+. Return to one dot
+-- Dash marker with two dashes
+- Single dash marker
+Term:: Description item.
+  Nested term:: Nested description.
+
+== 56. Mixed lists: blank lines between types
+
+* Unordered item A.
+
+. Ordered item B.
+
+
+- Dash item C.
+
+CPU:: Description item D.
+
+* Unordered item E.
+
+== 57. Mixed lists: comments between types
+
+* Unordered item.
+// Comment between list types.
+. Ordered item.
+// Another comment.
+CPU:: Description item.
+
+== 58. Mixed lists: attributes between types
+
+* Unordered item.
+
+[role="note"]
+. Ordered item after attribute.
+
+[role="example"]
+CPU:: Description item after attribute.
+
+== 59. Mixed lists: heading boundaries
+
+* Unordered item.
+. Ordered item.
+
+=== Heading
+
+CPU:: Description item after heading.
+* Unordered item after heading.
+
+== 60. Marker near misses: unordered and ordered lists
+
+* Valid asterisk item.
+*No space after asterisk.
+** Valid nested asterisk item.
+**No space after double asterisk.
+. Valid ordered item.
+.No space after dot.
+.. Valid nested ordered item.
+..No space after double dot.
+- Valid dash item.
+-Not a valid dash item.
+--Not a valid nested dash item.
+
+== 61. Marker near misses: description lists
+
+CPU:: Valid description.
+CPU: One colon only.
+CPU : : Separated colons.
+CPU::: Triple-colon delimiter.
+CPU:::: Four-colon delimiter.
+CPU ::::: Space before delimiter.
+:: Empty term.
+No delimiter here.
+
+== 62. Whitespace: leading spaces
+
+* Item at column zero.
+ * Item with one leading space.
+  * Item with two leading spaces.
+   * Item with three leading spaces.
+    * Item with four leading spaces.
+* Back to column zero.
+
+== 63. Whitespace: trailing spaces
+
+CPU:: Description with trailing spaces.   
+RAM:: Description with no trailing spaces.
+* Unordered item with trailing spaces.   
+. Ordered item with trailing spaces.   
+
+== 64. Whitespace: tabs and mixed whitespace
+
+* Item at column zero.
+	* Item preceded by a tab.
+   * Item preceded by three spaces.
+		* Item preceded by two tabs.
+  * Item preceded by two spaces.
+* Back at column zero.
+
+== 65. Deep nesting stress test
+
+* Level 1
+** Level 2
+*** Level 3
+**** Level 4
+***** Level 5
+****** Level 6
+******* Level 7
+******** Level 8
+********* Level 9
+********** Level 10
+********* Back to level 9
+******** Back to level 8
+******* Back to level 7
+****** Back to level 6
+***** Back to level 5
+**** Back to level 4
+*** Back to level 3
+** Back to level 2
+* Back to level 1
+
+== 66. Deep description nesting stress test
+
+L1:: Description level 1.
+  L2:: Description level 2.
+    L3:: Description level 3.
+      L4:: Description level 4.
+        L5:: Description level 5.
+          L6:: Description level 6.
+        Back to L5:: Return to level 5.
+      Back to L4:: Return to level 4.
+    Back to L3:: Return to level 3.
+  Back to L2:: Return to level 2.
+Back to L1:: Return to level 1.
+
+== 67. Consecutive list blocks with different types
+
+* Unordered A
+* Unordered B
+
+. Ordered A
+. Ordered B
+
+CPU:: Description A
+RAM:: Description B
+
+* Unordered C
+* Unordered D
+
+== 68. Lists after ordinary paragraphs
+
+This paragraph precedes an unordered list.
+
+* First item.
+* Second item.
+
+This paragraph precedes an ordered list.
+
+. First ordered item.
+. Second ordered item.
+
+This paragraph precedes a description list.
+
+CPU:: Processor.
+RAM:: Memory.
+
+== 69. Lists interrupted by literal content
+
+* Before literal block.
+----
+* Literal asterisk.
+. Literal dot.
+CPU:: Literal description syntax.
+----
+* After literal block.
+
+== 70. Lists interrupted by block comments
+
+* Before comment.
+////
+* This should remain inside the comment.
+CPU:: This should remain inside the comment.
+////
+* After comment.
+
+== 71. List terminators: blank lines and paragraphs
+
+* Item A
+
+* Item B
+
+A paragraph that may terminate the list.
+
+* Item C
+
+== 72. List terminators: block attributes
+
+* Item A
+
+[role="note"]
+* Item B
+
+== 73. List terminators: headings and delimiters
+
+* Item before heading.
+
+=== Heading boundary
+
+* Item after heading.
+
+* Item before delimiter.
+----
+literal block
+----
+* Item after delimiter.
+
+== 74. End-of-file termination
+
+* Final unordered item.
+** Final nested unordered item.
+. Final ordered item.
+CPU:: Final description item.
+  Nested final term::: Final nested description.
+
