@@ -1,0 +1,260 @@
+= asciiawk
+:toc:
+:toclevels: 2
+
+`asciiawk` is a small GNU AWK script that renders a practical subset of AsciiDoc as styled text in a terminal. It is intentionally not a complete AsciiDoc implementation.
+
+The goal is readable terminal output with minimal dependencies, not pixel-perfect compatibility with Asciidoctor.
+
+== Requirements
+
+* GNU AWK (`gawk`)
+* A terminal that supports ANSI escape sequences
+* A terminal font with box-drawing characters for table borders
+
+The script uses GNU AWK features such as `gensub()` and `typeof()`, so other AWK implementations are not supported.
+
+== Usage
+
+Run a document through the script:
+
+[source,shell]
+----
+gawk -f asciiawk.awk document.adoc
+----
+
+If the script is executable, you can also run:
+
+[source,shell]
+----
+./asciiawk.awk document.adoc
+----
+
+It also reads standard input:
+
+[source,shell]
+----
+cat document.adoc | ./asciiawk.awk
+----
+
+The renderer writes ANSI-styled text to standard output. Redirecting the output to a file preserves those escape sequences.
+
+== Supported syntax
+
+=== Headings
+
+One to six leading equals signs introduce a heading:
+
+[source,asciidoc]
+----
+= Document title
+== Section
+=== Subsection
+==== Level four
+===== Level five
+====== Level six
+----
+
+Heading levels are represented with indentation and terminal colors. Trailing closing equals signs are accepted in the usual simple form.
+
+=== Paragraphs
+
+Non-blank lines of ordinary text are collected into a paragraph. Blank lines end paragraphs. Physical source lines within a paragraph are joined for output.
+
+=== Inline formatting
+
+The renderer recognizes these common inline forms in text paths that use the inline formatter:
+
+[cols="1,2",options="header"]
+|===
+|Syntax |Terminal rendering
+
+|`*bold*`
+|Bold text
+
+|`_italic_`
+|Italic text
+
+|`+monospace+`
+|Monospace-style text
+
+|`` `monospace` ``
+|Monospace-style text
+
+|`#highlighted#`
+|Highlighted text
+|===
+
+Formatting is deliberately simple. This is not the full AsciiDoc inline substitution and escaping model. Complicated nesting, escaped delimiters, and ambiguous delimiter combinations are not guaranteed to behave like Asciidoctor. Inline formatting is not applied to every possible content location.
+
+=== Document attributes
+
+Attribute declarations use the usual `:name: value` form:
+
+[source,asciidoc]
+----
+:project: asciiawk
+:version: 0.1
+
+This is {project}, version {version}.
+----
+
+References in the form `{name}` are substituted in formatted text when the attribute has been defined. Unknown references are left unchanged. Attribute declarations are consumed rather than printed.
+
+This is a small substitution mechanism, not full AsciiDoc attribute processing. Attribute expressions, conditional directives, built-in attributes, and the complete attribute syntax are not implemented.
+
+=== Inline macros
+
+The following simple macros are recognized by the inline formatter:
+
+[source,asciidoc]
+----
+link:https://example.com[Example site]
+xref:other-page.adoc[Other page]
+image:diagram.png[System diagram]
+image::architecture.png[Architecture diagram]
+----
+
+* `link:` becomes the label followed by the URL in angle brackets.
+* `xref:` becomes its label; no document navigation is performed.
+* `image:` and `image::` become their alt text. Images are not loaded or displayed.
+
+Macro syntax is intentionally limited. Labels and targets containing whitespace or complex bracket syntax may not be handled correctly.
+
+=== Lists
+
+The renderer supports basic list forms and nesting:
+
+[source,asciidoc]
+----
+* Unordered item
+** Nested unordered item
+
+. Ordered item
+.. Nested ordered item
+
+- Dash item
+
+Term:: Description
+Nested term::: Nested description
+----
+
+* Asterisk markers create unordered lists.
+* Dot markers create numbered lists.
+* A single dash marker creates a dash-style item.
+* Description-list delimiters (`::`, `:::`, and further colons) distinguish nesting levels.
+* Checklist markers such as `* [ ]` and `* [x]` are retained as item text; they are not interactive controls.
+* List item text, description terms, and descriptions pass through the inline formatter.
+
+This covers common list structures, not every AsciiDoc list continuation, callout list, or mixed-list edge case.
+
+=== Tables
+
+Tables use the `|===` delimiter:
+
+[source,asciidoc]
+----
+|===
+|Name |Purpose
+
+|asciiawk
+|Render AsciiDoc in a terminal
+
+|GNU AWK
+|Run the renderer
+|===
+----
+
+The renderer builds terminal tables with box-drawing borders. Basic table attributes can configure column count and layout, including common `cols`, `grid`, and `frame` settings. Header/footer options and table titles/captions are handled in a limited form.
+
+Table parsing is intentionally basic. Do not expect complete support for the full AsciiDoc table model, every cell style, nested block content, or all cell span/alignment combinations. Inline formatting within table cells is not guaranteed.
+
+=== Delimited blocks
+
+The following delimiters are recognized:
+
+[cols="1,2",options="header"]
+|===
+|Delimiter |Purpose
+
+|`----`
+|Listing block
+
+|`....`
+|Literal block
+
+|`====`
+|Example block
+
+|`****`
+|Sidebar block
+
+|`____`
+|Quote block
+
+|`--`
+|Open block
+
+|`////`
+|Comment block; content is omitted
+|===
+
+Non-comment blocks are rendered as terminal panels using their respective styles. Listing and literal content is kept as block content rather than being passed through the inline formatter. Open blocks are handled with the same simple delimited-block mechanism; full nested block semantics are not implemented.
+
+=== Block attributes and titles
+
+A line such as `[cols="2",options="header"]` is collected as block attributes for the following supported block. A title line beginning with a dot, such as `.Example title`, is collected as a title for the next block.
+
+Only attributes understood by the relevant renderer have an effect. Attribute parsing is limited and does not reproduce all AsciiDoc attribute-list rules.
+
+=== Admonitions
+
+Single-line paragraph admonitions are supported:
+
+[source,asciidoc]
+----
+NOTE: A note.
+TIP: A tip.
+IMPORTANT: Important information.
+WARNING: A warning.
+CAUTION: A caution.
+----
+
+The label is highlighted and the message is rendered as text. Further non-blank source lines continue the admonition until a blank line ends it. Admonition blocks using `[NOTE]` followed by a delimited block are outside the supported subset.
+
+=== Horizontal rules and page breaks
+
+[source,asciidoc]
+----
+Text before the rule.
+
+'''
+
+Text after the rule.
+
+<<<
+
+Text after the page break.
+----
+
+A line containing three or more apostrophes renders a horizontal rule. A line containing three or more less-than signs renders a visible page-break marker. These are terminal-oriented interpretations, not actual pagination.
+
+=== Comments
+
+Single-line comments beginning with `//` are ignored. Delimited comment blocks using `////` are also omitted.
+
+== Deliberate limitations
+
+`asciiawk` does not aim to implement the AsciiDoc specification. In particular, it does not provide:
+
+* Full Asciidoctor compatibility or a standards-complete parser.
+* Document includes, conditionals, or the full attribute system.
+* Cross-reference resolution, document navigation, or image rendering.
+* Full inline escaping, unconstrained delimiter rules, or arbitrary nested formatting.
+* Complete list continuations, callout lists, or all mixed-list structures.
+* Full table semantics or arbitrary nested content inside table cells.
+* Complete admonition block semantics.
+* HTML, PDF, or other document backends.
+
+Unsupported syntax may be displayed as ordinary text, partially interpreted, or ignored depending on the construct. The result should be treated as a convenient terminal rendering, not as a validation tool for AsciiDoc documents.
+
