@@ -1,4 +1,4 @@
-#!/usr/bin/env -S awk -f
+#!/usr/bin/env -S gawk -f
 # asciiawk 
 # written by Dr.Helicopte.  
 # october of 2026
