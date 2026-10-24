@@ -1,0 +1,129 @@
+[1;35mHorizontal Rules and Page Breaks Test[0m
+
+  [1;36m1. Horizontal Rules[0m
+
+Before the rule.
+
+''
+
+After the rule.
+
+  [1;36m2. Consecutive Rules[0m
+
+First rule.
+
+────────────────────────────────────────────────────────────────────────────────
+
+Second rule.
+
+────────────────────────────────────────────────────────────────────────────────
+
+Third rule.
+
+  [1;36m3. Rule Near Other Content[0m
+
+Paragraph before.
+
+────────────────────────────────────────────────────────────────────────────────
+
+Paragraph between.
+
+────────────────────────────────────────────────────────────────────────────────
+
+Paragraph after.
+
+  [1;36m4. Rule Near Headings[0m
+
+  [1;36mHeading Before[0m
+
+────────────────────────────────────────────────────────────────────────────────
+
+  [1;36mHeading After[0m
+
+  [1;36m5. Rule Inside a List[0m
+
+
+[1;32m*[0m First list item 
+[1;32m*[0m Second list item 
+
+────────────────────────────────────────────────────────────────────────────────
+
+
+[1;32m*[0m Item after the rule 
+
+  [1;36m6. Rule Near Delimited Blocks[0m
+
+[48;5;0m               [0m
+[48;5;0m Listing block [0m
+[48;5;0m               [0m
+────────────────────────────────────────────────────────────────────────────────
+
+[33;40m               [0m
+[33;40m Example block [0m
+[33;40m               [0m
+  [1;36m7. Page Break[0m
+
+Content before the page break.
+
+════════════════════════════════════════════════════════════════════════════════
+
+Content after the page break.
+
+  [1;36m8. Consecutive Page Breaks[0m
+
+First page.
+
+════════════════════════════════════════════════════════════════════════════════
+
+Second page.
+
+════════════════════════════════════════════════════════════════════════════════
+
+Third page.
+
+  [1;36m9. Page Break Near Headings[0m
+
+  [1;36mFirst Section[0m
+
+Content here.
+
+════════════════════════════════════════════════════════════════════════════════
+
+  [1;36mSecond Section[0m
+
+More content.
+
+  [1;36m10. Page Break Near Lists[0m
+
+
+[1;32m*[0m First item 
+[1;32m*[0m Second item 
+
+════════════════════════════════════════════════════════════════════════════════
+
+
+[1;32m*[0m Third item 
+[1;32m*[0m Fourth item 
+
+  [1;36m11. Similar-Looking Syntax[0m
+
+This is three apostrophes in ordinary text: ''' but not alone on a line.
+
+This is three less-than signs in ordinary text: <<< but not alone on a line.
+
+< << <
+< ' ' '
+
+  [1;36m12. Whitespace and Indentation[0m
+
+'''
+
+<<<
+
+  [1;36m13. End of File[0m
+
+Content before final rule.
+
+────────────────────────────────────────────────────────────────────────────────
+
+[0m

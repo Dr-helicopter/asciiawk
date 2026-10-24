@@ -1,0 +1,126 @@
+= Horizontal Rules and Page Breaks Test
+
+== 1. Horizontal Rules
+
+Before the rule.
+
+''
+
+After the rule.
+
+== 2. Consecutive Rules
+
+First rule.
+
+'''
+
+Second rule.
+
+'''
+
+Third rule.
+
+== 3. Rule Near Other Content
+
+Paragraph before.
+
+'''
+
+Paragraph between.
+
+'''
+
+Paragraph after.
+
+== 4. Rule Near Headings
+
+== Heading Before
+
+'''
+
+== Heading After
+
+== 5. Rule Inside a List
+
+* First list item
+* Second list item
+
+'''
+
+* Item after the rule
+
+== 6. Rule Near Delimited Blocks
+
+----
+Listing block
+----
+
+'''
+
+====
+Example block
+====
+
+== 7. Page Break
+
+Content before the page break.
+
+<<<
+
+Content after the page break.
+
+== 8. Consecutive Page Breaks
+
+First page.
+
+<<<
+
+Second page.
+
+<<<
+
+Third page.
+
+== 9. Page Break Near Headings
+
+== First Section
+
+Content here.
+
+<<<
+
+== Second Section
+
+More content.
+
+== 10. Page Break Near Lists
+
+* First item
+* Second item
+
+<<<
+
+* Third item
+* Fourth item
+
+== 11. Similar-Looking Syntax
+
+This is three apostrophes in ordinary text: ''' but not alone on a line.
+
+This is three less-than signs in ordinary text: <<< but not alone on a line.
+
+< << <
+< ' ' '
+
+== 12. Whitespace and Indentation
+
+   '''
+
+   <<<
+
+== 13. End of File
+
+Content before final rule.
+
+'''
+

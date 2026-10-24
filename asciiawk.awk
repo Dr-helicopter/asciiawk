@@ -87,8 +87,8 @@ function parse_block_atrributes(    s, entry, key, val, quoted, eq) {
 			val = substr(entry, eq + 1)
 			sub(/^[ ]+/, "", val)
 			if (quoted) {
-				val = substr(val, 2, length(val) - 2)        # strip the quotes
-				val = gensub(/\\(.)/, "\\1", "g", val)       # unescape \" and \\
+				val = substr(val, 2, length(val) - 2)	# strip the quotes
+				val = gensub(/\\(.)/, "\\1", "g", val)	# unescape \" and \\
 			}
 		}
 		set_attribute(key, val, quoted)
@@ -763,6 +763,7 @@ function terminate_list() {
 }
 
 
+# could be part of the next condition below, but i think this is cleaner.
 in_list {
 	if (!(/^\** / || /^\- / || /^\.* / || /^[ ]*$/ || /^.+::+($|[ ])/) && 
 			list_terminable) {
@@ -838,6 +839,16 @@ in_list {
 	}
 }
 
+# hrules
+/^'''+[[:space:]]*$/ {
+	printf("%s\n\n", pad("", "─", paragraph_width))
+	next
+}
+
+/^<<<[[:space:]]*$/ {
+	printf("%s\n\n", pad("", "═", paragraph_width))
+	next
+}
 
 # title 
 /^\.{1,2}[^ \.].*/ {
