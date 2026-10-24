@@ -1,0 +1,59 @@
+[1;35mwhat terminates an andomin ?[0m
+
+
+[1;30;43mNOTE: [0m
+   normal adomin 
+NOTE:
+line break
+
+
+[1;30;43mNOTE: [0m
+   line break extra 
+
+[1;30;43mNOTE: [0m
+   line break 
+extra with space
+
+
+[1;30;43mNOTE: [0m
+   block 
+[33;40m       [0m
+[33;40m asdad [0m
+[33;40m       [0m
+dd
+
+
+[1;30;43mNOTE: [0m
+   table 
+┌──────┐
+│asdasd[0m│
+└──────┘
+
+asdasd
+
+
+[1;30;43mNOTE: [0m
+   list * a * b 
+
+[1;30;43mNOTE: [0m
+   title .tit 
+
+[1;30;43mNOTE: [0m
+   attrib 
+asd
+
+
+[1;30;43mNOTE: [0m
+   comment \\comment 
+
+[1;30;43mNOTE: [0m
+   block comment \\\\ asdasd \\\\ 
+
+[1;30;43mNOTE: [0m
+   heading = asdasd 
+
+[1;30;43mNOTE: [0m
+   hrule ''' asd 
+
+[1;30;43mNOTE: [0m
+   page break <<< [0m

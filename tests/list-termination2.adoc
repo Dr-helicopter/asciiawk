@@ -1,0 +1,352 @@
+= what terminates a list ?
+
+nothing
+
+. a
+. b
+
+. c
+. d
+
+
+'''
+
+. a
+. b
+text
+. c
+. d
+
+'''
+
+. a
+. b
+text after
+
+. c
+. d
+
+'''
+
+. a
+. b
+
+text before
+. c
+. d
+
+'''
+
+. a
+. b
+''''
+. c
+. d
+
+''''
+
+. a
+. b
+
+''''
+. c
+. d
+
+. a
+. b
+''''
+
+. c
+. d
+
+
+''''
+
+
+. a
+. b
+====
+example
+====
+. c
+. d
+
+''''
+
+
+. a
+. b
+====
+example
+====
+
+. c
+. d
+
+''''
+
+
+. a
+. b
+
+====
+example
+====
+. c
+. d
+
+
+''''
+
+
+. a
+. b
+|====
+|table
+|====
+. c
+. d
+
+''''
+
+
+. a
+. b
+|====
+|table
+|====
+
+. c
+. d
+
+''''
+
+
+. a
+. b
+
+|====
+|table
+|====
+. c
+. d
+
+
+''''
+
+
+. a
+. b
+// comment
+. c
+. d
+
+''''
+
+
+. a
+. b
+// comment
+
+. c
+. d
+
+''''
+
+
+. a
+. b
+
+// comment
+. c
+. d
+
+
+''''
+
+
+. a
+. b
+////
+comment block
+////
+. c
+. d
+
+''''
+
+
+. a
+. b
+////
+comment block
+////
+
+. c
+. d
+
+''''
+
+
+. a
+. b
+
+////
+comment block
+////
+. c
+. d
+
+
+''''
+
+
+. a
+. b
+[atribute]
+. c
+. d
+
+''''
+
+
+. a
+. b
+[atribute]
+
+. c
+. d
+
+''''
+
+
+. a
+. b
+
+[atribute]
+. c
+. d
+
+
+''''
+
+
+. a
+. b
+NOTE: Adomin
+. c
+. d
+
+''''
+
+
+. a
+. b
+NOTE: Adomin
+
+. c
+. d
+
+''''
+
+
+. a
+. b
+
+NOTE: Adomin
+. c
+. d
+
+
+''''
+
+
+. a
+. b
+<<<
+. c
+. d
+
+''''
+
+
+. a
+. b
+<<<
+
+. c
+. d
+
+''''
+
+
+. a
+. b
+
+<<<
+. c
+. d
+
+
+''''
+
+
+
+. a
+. b
+.title
+. c
+. d
+
+''''
+
+
+. a
+. b
+.title
+
+. c
+. d
+
+''''
+
+
+. a
+. b
+
+.title
+. c
+. d
+
+
+''''
+
+
+. a
+. b
+= heading
+. c
+. d
+
+''''
+
+
+. a
+. b
+= heading
+
+. c
+. d
+
+''''
+
+
+. a
+. b
+
+= heading
+. c
+. d
+
+
+''''

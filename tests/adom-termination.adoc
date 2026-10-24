@@ -1,0 +1,59 @@
+= what terminates an andomin ?
+
+
+NOTE: normal adomin
+
+NOTE: 
+line break
+
+
+NOTE: line break
+extra
+
+
+NOTE: line break
+
+extra with space
+
+NOTE: block
+====
+asdad
+====
+dd
+
+NOTE: table
+|====
+asdasd
+|====
+asdasd
+
+NOTE: list
+* a
+* b
+
+NOTE: title
+.tit
+
+NOTE: attrib
+[attribute]
+asd 
+
+NOTE: comment
+\\comment
+
+NOTE: block comment
+\\\\
+asdasd
+\\\\
+
+NOTE: heading
+= asdasd
+
+
+
+NOTE: hrule
+'''
+asd
+
+NOTE: page break 
+<<<

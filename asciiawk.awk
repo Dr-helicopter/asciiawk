@@ -585,7 +585,9 @@ BEGIN { # mostly variable assignments
 
 	style_ti = "\033[1;33m"
 
-	style_li = "\033[1;32m"	  # yellow
+	style_li = "\033[1;32m"
+
+	style_adomin = "\033[1;30;43m"	# yellow
 
 	style["literal"] = style_literal
 	style["listing"] = style_listing
@@ -673,9 +675,9 @@ in_table {
 	table_has_empty_seccond_line = 0
 	table_read_seccond_line = 0
 
-	if (in_list) {
+	if (in_list)
 		terminate_list()
-	}
+	terminate_adomin()
 	dump_paragraph()
 	next
 }
@@ -699,8 +701,9 @@ in_table {
 
 	if (in_list) {
 		terminate_list()
-		printf("\n")
+		printf "\n"
 	}
+	terminate_adomin()
 	dump_paragraph()
 	next
 }
@@ -716,6 +719,7 @@ in_table {
 # block attribute
 /^\[([[:alnum:]_.#%{,"'].*)?\]$/ {
 	if (list_terminable) terminate_list()
+	terminate_adomin()
 	sub(/^\[/, "")
 	sub(/\]$/, "")
 
@@ -773,7 +777,7 @@ in_list {
 }
 
 ((/^[ ]*\*+ / || /[ ]*^\- / || /[ ]*^\.+ / || /^.+::+($|[ ])/) && 
-		!in_paragraph) || in_list {
+		!in_paragraph && !in_adomin) || in_list {
 	$0 = trim($0)
 
 	if ($0 == "") {
@@ -838,6 +842,42 @@ in_list {
 		next
 	}
 }
+
+function terminate_adomin() {
+	if (in_adomin) {
+		in_adomin = 0
+		printf "\n"
+	}
+}
+
+in_adomin {
+	if ($0 ~ /^[[:space:]]*$/) {
+		in_adomin = 0
+		printf "\n"
+	} else 
+		printf("%s ", trim($0))
+	next
+}
+
+(/^(NOTE|TIP|IMPORTANT|WARNING|CAUTION): ./) && !in_paragraph {
+	in_adomin = 1
+	printf "\n"
+
+	parse_block_atrributes()
+	block_attribute_list = ""
+	if ("title" in attributes) 
+		printf("%s.%s\n", style_ti, attributes["title"] style_none)
+	delete attributes
+	delete opts_attributes
+
+
+	match($0, /^[^:]*:/)
+	
+	printf("%s%s %s\n", style_adomin, substr($0, 1, RLENGTH), style_none)
+	sub(/^[^:]*:[[:space:]]*/, "")
+	printf("   %s ", trim($0))
+	next
+} 
 
 # hrules
 /^'''+[[:space:]]*$/ {
