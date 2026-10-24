@@ -6,7 +6,6 @@
 NOTE:
 line break
 
-
 [1;30;43mNOTE: [0m
    line break extra 
 
@@ -14,14 +13,13 @@ line break
    line break 
 extra with space
 
-
 [1;30;43mNOTE: [0m
    block 
 [33;40m       [0m
 [33;40m asdad [0m
 [33;40m       [0m
-dd
 
+dd
 
 [1;30;43mNOTE: [0m
    table 
@@ -30,7 +28,6 @@ dd
 └──────┘
 
 asdasd
-
 
 [1;30;43mNOTE: [0m
    list * a * b 
@@ -41,7 +38,6 @@ asdasd
 [1;30;43mNOTE: [0m
    attrib 
 asd
-
 
 [1;30;43mNOTE: [0m
    comment \\comment 

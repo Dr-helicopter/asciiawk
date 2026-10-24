@@ -230,7 +230,7 @@ function delimeted_bock_dump(lines, len, width, style, end_style,    i) {
 	for (i=0;i<len;i++)
 		printf("%s %-*s%s\n", style, 
 		   width,lines[i], end_style)
-	printf("%s %-*s%s\n", style, width," ", end_style)
+	printf("%s %-*s%s\n\n", style, width," ", end_style)
 
 	delete attributes
 	delete opts_attributes
@@ -568,6 +568,87 @@ function dump_table() {
 }
 
 
+function dump_paragraph() {
+	if (paraghraph_text != "")
+		printf("%s", format_inline(paraghraph_text))
+	paraghraph_text = ""
+	in_paragraph = 0
+}
+
+
+
+function inline_restore(bold, italic,    s) {
+    s = ""
+    if (bold) s = s "\033[1m"
+	if (italic) s = s "\033[3m"
+    return s
+}
+
+function format_inline(text, bold, italic,    out, i, j, n, c, prev, nxt, inner, found) {
+    out = ""
+    n = length(text)
+
+    for (i = 1; i <= n; ) {
+        c = substr(text, i, 1)
+        prev = (i > 1 ? substr(text, i - 1, 1) : "")
+        nxt = (i < n ? substr(text, i + 1, 1) : "")
+        found = 0
+
+        # monospace: content is literal, so don't parse its contents.
+        if (c == "`" && nxt != "`" && prev != "`") {
+            for (j = i + 1; j <= n; j++) {
+                if (substr(text, j, 1) == "`" &&
+                    substr(text, j - 1, 1) != "`" &&
+                    substr(text, j + 1, 1) != "`" &&
+                    j > i + 1) {
+                    inner = substr(text, i + 1, j - i - 1)
+                    out = out style_literal inner style_none \
+                        inline_restore(bold, italic)
+                    i = j + 1
+                    found = 1
+                    break
+                }
+            }
+
+            if (found)
+                continue
+        }
+
+        # Bold and italic: avoid treating markers inside words as delimiters.
+        if ((c == "*" || c == "_") &&
+            !(prev ~ /[[:alnum:]]/)) {
+            for (j = i + 1; j <= n; j++) {
+                if (substr(text, j, 1) == c &&
+                    j > i + 1 &&
+                    !(substr(text, j + 1, 1) ~ /[[:alnum:]]/)) {
+                    inner = substr(text, i + 1, j - i - 1)
+
+                    if (c == "*")
+                        out = out "\033[1m" \
+                            format_inline(inner, 1, italic) \
+                            style_none inline_restore(bold, italic)
+                    else
+                        out = out "\033[3m" \
+                            format_inline(inner, bold, 1) \
+                            style_none inline_restore(bold, italic)
+
+                    i = j + 1
+                    found = 1
+                    break
+                }
+            }
+
+            if (found)
+                continue
+        }
+
+        # No valid delimiter pair: preserve the character.
+        out = out c
+        i++
+    }
+
+    return out
+}
 
 
 BEGIN { # mostly variable assignments
@@ -622,14 +703,6 @@ BEGIN { # mostly variable assignments
 { # line cleanups
 	gsub(/\t/, "    ")
 	sub(/[ \t\r]+$/, "")
-}
-
-
-function dump_paragraph() {
-	if (paraghraph_text != "")
-		print(paraghraph_text)
-	paraghraph_text = ""
-	in_paragraph = 0
 }
 
 

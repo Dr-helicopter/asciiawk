@@ -2,11 +2,10 @@
 
 -- text
 ====
-* item
-_italic_
+[1m item
+[3mitalic[0m[1m
 ---
-***
-___
+[0m**
+[3m_[0m
 ===
-
 [0m
