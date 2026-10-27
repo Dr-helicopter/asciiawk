@@ -62,7 +62,7 @@ function is_string_at(arr, i,    t) {
 
 
 # parses block_attribute_list into attributes[] and opts_attributes[]
-function parse_block_atrributes(    s, entry, key, val, quoted, eq) {
+function parse_block_attributes(    s, entry, key, val, quoted, eq) {
 	s = block_attribute_list
 
 	while (s != "") {
@@ -108,7 +108,7 @@ function parse_table_cols(s,    n, i, j, mul, idx, tmp, tmp2) {
 	for (i=1;i<=n;i++){
 		j = split(tmp[i], tmp2, /\*/)
 		# if we have a multiplier we want to repeat the next action
-		# times the multiplier and we want to do it on the seccond part of the 
+		# times the multiplier and we want to do it on the second part of the 
 		# splited array, otherwise we only do it once
 		mul = 1
 		if (j > 1){
@@ -170,58 +170,61 @@ function set_attribute(key, val, quoted,    tmp, i, c) {
 
 # an ugly function that takes a raw cell declaration and parses the next cell's
 # specs and returns the cleaned cell contents
-function parse_cel_specs(str, idx,    s) {
+function parse_cell_specs(str, idx,    s) {
 	s = str
-	delete nxt_cel_spec
-	idx = idx % table_column_count
+	delete nxt_cell_spec
+	# the current cell index and the spec being read is offcet by one
+	# so we add one to the index
+	idx = idx % table_column_count + 1
 	idx = idx == 0 ? table_column_count : idx
 
-	nxt_cel_spec["mul"] = 1
-	nxt_cel_spec["hspan"] = 1
-	nxt_cel_spec["vspan"] = 1
-	nxt_cel_spec["style"] = table_col_style[idx]
-	nxt_cel_spec["halign"] = table_col_halign[idx]
-	nxt_cel_spec["valign"] = table_col_valign[idx]
+	nxt_cell_spec["mul"] = 1
+	nxt_cell_spec["hspan"] = 1
+	nxt_cell_spec["vspan"] = 1
+
+	nxt_cell_spec["style"] = table_col_style[idx]
+	nxt_cell_spec["halign"] = table_col_halign[idx]
+	nxt_cell_spec["valign"] = table_col_valign[idx]
 	
 	# if we dont match this regex, we certainly dont have a spec
 	if (s !~ /[ ](([0-9]*\.?[0-9]+\+)|([0-9]+\*))?[<^>]?(\.[<^>])?[adehlmsv]?$/)
 		return s
 
 	if 	(s ~ /[adehlmsv]$/) { # styling spec
-		nxt_cel_spec["style"] = substr(s, length(s), 1)
+		nxt_cell_spec["style"] = substr(s, length(s), 1)
 		s = substr(s, 1,length(s)-1)
 	} 
 
 	if(s ~ /(\.[<^>])$/) { # valign spec
-		nxt_cel_spec["valign"] = substr(s, length(s), 1)
+		nxt_cell_spec["valign"] = substr(s, length(s), 1)
 		s = substr(s, 1,length(s)-2)
 	} if(s ~ /[<^>]$/) { # hspan spec
-		nxt_cel_spec["halign"] = substr(s, length(s), 1)
+		nxt_cell_spec["halign"] = substr(s, length(s), 1)
 		s = substr(s, 1,length(s)-1)
 	} 
 
 	# we either have a multiplier or a span
 	if (s ~ /[0-9]+\*$/) { # we have a mul
 		match(s, /[0-9]+\*$/)
-		nxt_cel_spec["mul"] = int(substr(s, RSTART, RLENGTH-1))
+		nxt_cell_spec["mul"] = int(substr(s, RSTART, RLENGTH-1))
 		s = substr(s, 1, RSTART - 1)
 	} else if (s ~  /\+$/ ) { # we have a span spec
 		# we dont need the '+'
 		s = substr(s, 1,length(s)-1)
 
 		if (match(s, /\.[0-9]+$/)) {
-			nxt_cel_spec["vspan"] = int(substr(s, RSTART+1))
+			nxt_cell_spec["vspan"] = int(substr(s, RSTART+1))
 			s = substr(s, 1, RSTART-1)
 		}
 		if (match(s, /[0-9]+$/)) {
-			nxt_cel_spec["hspan"] = int(substr(s, RSTART))
+			nxt_cell_spec["hspan"] = int(substr(s, RSTART))
 			s = substr(s, 1, RSTART-1)
 		}
 	}
 	return s
 }
 
-function delimeted_bock_dump(lines, len, width, style, end_style,    i) {
+function delimited_block_dump(lines, len, width, style, end_style,    i) {
 	block_attribute_list = ""
 
 	width++
@@ -264,76 +267,76 @@ function row_draw(row,    border, txt, j, i, s) {
 		j = row * table_column_count + i
 
 		# get the text and pad it with spaces
-		txt = pad(table_cels[j], " ", table_cel_width[i],
-			cel_halign[table_cel_halign[j]])
+		txt = pad(table_cells[j], " ", table_cell_width[i],
+			cell_halign[table_cell_halign[j]])
 
 		# decide the border
-		border = table_cels_no_back_border[j] == 1 ? J["0000"] : J["1100"]
+		border = table_cells_no_back_border[j] == 1 ? J["0000"] : J["1100"]
 
 		# append to the string
-		s = s border table_cel_styles[j] txt style_none 	
+		s = s border table_cell_styles[j] txt style_none 	
 	}
 	return s J["1100"] "\n"
 }
 
-function boarder_draw_top(     i, s, start) {
+function border_draw_top(     i, s, start) {
 	# the first cell
-	s = J["0101"] pad("", J["0011"], table_cel_width[1])
+	s = J["0101"] pad("", J["0011"], table_cell_width[1])
 
 	for (i=2;i<=table_column_count;i++) {
 		# decide what the next cell should start with
-		start = table_cels_no_back_border[i] == 1 ? J["0011"] : J["0111"] 
+		start = table_cells_no_back_border[i] == 1 ? J["0011"] : J["0111"] 
 
 		# append
-		s = s start pad("", J["0011"], table_cel_width[i])
+		s = s start pad("", J["0011"], table_cell_width[i])
 	}
 	return s J["0110"] "\n"
 }
 
-function boarder_draw_bottom(     i, j, s, start) {
+function border_draw_bottom(     i, j, s, start) {
 	# the first cell
-	s = J["1001"] pad("", J["0011"], table_cel_width[1])
+	s = J["1001"] pad("", J["0011"], table_cell_width[1])
 
 	# find the first cell in the last row
 	j = (table_row_count - 1) * table_column_count + 1
 
 	for (i=2;i<=table_column_count;i++) {
 		# decide what the next cell should start with
-		start = table_cels_no_back_border[++j] == 1 ? J["0011"] : J["1011"] 
+		start = table_cells_no_back_border[++j] == 1 ? J["0011"] : J["1011"] 
 
 		# append
-		s = s start pad("", J["0011"], table_cel_width[i])
+		s = s start pad("", J["0011"], table_cell_width[i])
 	}
 	return s J["1010"] "\n"
 }
 
-function boarder_draw_mid(row,     i, j, s, border, start) {
+function border_draw_mid(row,     i, j, s, border, start) {
 	# now this one is a bit more complex
 
 	# find the cell index and decide if weeven have a border 
 	j = row * table_column_count + 1
-	border = table_cels_no_up_border[j] == 1 ? J["0000"] : J["0011"]
+	border = table_cells_no_up_border[j] == 1 ? J["0000"] : J["0011"]
 
 	# make the first cell
-	s = J["1101"] pad("", border, table_cel_width[1])
+	s = J["1101"] pad("", border, table_cell_width[1])
 
 	for (i=2;i<=table_column_count;i++) {
 		j++
-		border = (table_cels_no_up_border[j] == 1) ? J["0000"] : J["0011"]
+		border = (table_cells_no_up_border[j] == 1) ? J["0000"] : J["0011"]
 
 		# first look at the cell under the border
 		# then look at the cell above and decide the strting character
-		if (table_cels_no_back_border[j])
-			if (table_cels_no_back_border[j - table_column_count])
+		if (table_cells_no_back_border[j])
+			if (table_cells_no_back_border[j - table_column_count])
 				start =  J["0011"]
 			else start =  J["1011"]
 		else 
-			if (table_cels_no_back_border[j - table_column_count])
+			if (table_cells_no_back_border[j - table_column_count])
 				start = J["0111"]
 			else start = J["1111"] 
 
 		# construct the cell
-		s = s start pad("", border, table_cel_width[i])
+		s = s start pad("", border, table_cell_width[i])
 	}
 	s = s J["1110"] "\n"
 
@@ -354,17 +357,17 @@ function render_table(data,    i, j, cols_attibutes, cols_attibute_count, grid) 
 	if (table_row_count == 0) return
 
 	# construct a basic table
-	table_lines[0] = boarder_draw_top()
+	table_lines[0] = border_draw_top()
 	table_lines[1] = row_draw(0)
 	for (i=1;i<table_row_count;i++) {
-		table_lines[i*2] = boarder_draw_mid(i)
+		table_lines[i*2] = border_draw_mid(i)
 		table_lines[i*2 +1] = row_draw(i)
 	}
-	table_lines[i*2] = boarder_draw_bottom()
+	table_lines[i*2] = border_draw_bottom()
 
 
 
-	if (!opts_attributes["noheader"] && table_has_empty_seccond_line)
+	if (!opts_attributes["noheader"] && table_has_empty_second_line)
 		opts_attributes["header"] = 1
 
 
@@ -421,13 +424,13 @@ function render_table(data,    i, j, cols_attibutes, cols_attibute_count, grid) 
 # END of table draw functoins
 
 
-function parse_table(data, x_cel_size,    tmp, i, j, k, w, v,
+function parse_table(data, x_cell_size,    tmp, i, j, k, w, v,
 					 back_flag, up_flag) {
-	delete table_cels
-	delete table_cels_no_back_border
-	delete table_cels_no_up_border
-	delete table_cel_styles
-	delete table_cel_halign
+	delete table_cells
+	delete table_cells_no_back_border
+	delete table_cells_no_up_border
+	delete table_cell_styles
+	delete table_cell_halign
 
 	# get the table_column_count
 	if (attributes["cols-count"])
@@ -439,17 +442,17 @@ function parse_table(data, x_cel_size,    tmp, i, j, k, w, v,
 	# parse_cells
 	j=1
 	mul=1
-	cur_cel_style = "" 
-	cur_cel_halign = ""
-	cur_cel_hspan = 1
-	cur_cel_vspan = 1
+	cur_cell_style = "" 
+	cur_cell_halign = ""
+	cur_cell_hspan = 1
+	cur_cell_vspan = 1
 
 	item_count = split(data, tmp, "|")
 	for (i=1;i<=item_count;i++) {
 		# edge case, we have no nxt_style when we are at the last pipe
 		if (item_count!=i) 
-			tmp[i] = parse_cel_specs(tmp[i], j)
-
+			tmp[i] = parse_cell_specs(tmp[i],
+				(i==1 && tmp[i] ~ /^[[:space:]]*$/) ? 0 : j) # 0 gives column 1
 		
 		# edge case, if we have a spec before the first pipe
 		# and not a first cell without a pipe
@@ -459,29 +462,29 @@ function parse_table(data, x_cel_size,    tmp, i, j, k, w, v,
 		tmp[i] = trim(tmp[i])
 		
 		# we dont want to write over filled cells
-		while(is_string_at(table_cels,j)) j++
+		while(is_string_at(table_cells,j)) j++
 
-		if (cur_cel_hspan>1 || cur_cel_vspan>1) { # cel is a span
+		if (cur_cell_hspan>1 || cur_cell_vspan>1) { # cel is a span
 			v = j
 
 			up_flag = 0
-			for (w=1;w<=cur_cel_vspan;w++) {
+			for (w=1;w<=cur_cell_vspan;w++) {
 				back_flag = 0
-				for (k=1;k<=cur_cel_hspan;k++) {
-					if (is_string_at(table_cels, v)) { # collision ! ABORT !
-						k = cur_cel_hspan
-						w = cur_cel_vspan
+				for (k=1;k<=cur_cell_hspan;k++) {
+					if (is_string_at(table_cells, v)) { # collision ! ABORT !
+						k = cur_cell_hspan
+						w = cur_cell_vspan
 					}
 
 					if (v % table_column_count == 0) { # end of row! ABORT !
-						k = cur_cel_hspan
+						k = cur_cell_hspan
 					}
 
-					table_cels[v] = ""
-					table_cel_styles[v] = cel_spec_styles[cur_cel_style]
-					table_cel_halign[v] = cur_cel_halign
-					table_cels_no_back_border[v] = back_flag
-					table_cels_no_up_border[v] = up_flag
+					table_cells[v] = ""
+					table_cell_styles[v] = cell_spec_styles[cur_cell_style]
+					table_cell_halign[v] = cur_cell_halign
+					table_cells_no_back_border[v] = back_flag
+					table_cells_no_up_border[v] = up_flag
 
 					back_flag = 1
 					v++
@@ -490,46 +493,46 @@ function parse_table(data, x_cel_size,    tmp, i, j, k, w, v,
 				v = j + w * table_column_count
 			}
 
-			if (cur_cel_halign == ">"){
-				t = j%table_column_count + cur_cel_halign
-	table_cels[j + (t > table_column_count ? table_column_count : t)] = tmp[i]
+			if (cur_cell_halign == ">"){
+				t = j%table_column_count + cur_cell_halign
+	table_cells[j + (t > table_column_count ? table_column_count : t)] = tmp[i]
 			} else 
-			table_cels[j] = tmp[i]
+			table_cells[j] = tmp[i]
 			j++
 
 		} else {
 			for (k=1;k<=mul;k++){
 				# we dont want to write over filled cells
-				while(is_string_at(table_cels,j)) j++
+				while(is_string_at(table_cells,j)) j++
 
 				# if we gonna multiply the cells we have to give the specs of
 				# the cel we just passed to its mult
-				table_cels[j] = tmp[i]
-				table_cel_styles[j] = cel_spec_styles[cur_cel_style]
-				table_cel_halign[j] = cur_cel_halign
+				table_cells[j] = tmp[i]
+				table_cell_styles[j] = cell_spec_styles[cur_cell_style]
+				table_cell_halign[j] = cur_cell_halign
 				j++
 			}
 		}
-		cur_cel_style = nxt_cel_spec["style"]
-		cur_cel_halign = nxt_cel_spec["halign"]
-		cur_cel_hspan = nxt_cel_spec["hspan"]
-		cur_cel_vspan = nxt_cel_spec["vspan"]
+		cur_cell_style = nxt_cell_spec["style"]
+		cur_cell_halign = nxt_cell_spec["halign"]
+		cur_cell_hspan = nxt_cell_spec["hspan"]
+		cur_cell_vspan = nxt_cell_spec["vspan"]
 	
-		mul = nxt_cel_spec["mul"]
+		mul = nxt_cell_spec["mul"]
     }
 
 	# we count until we are out of filled
-	while(is_string_at(table_cels,j)) j++
+	while(is_string_at(table_cells,j)) j++
 
     # j-1 is the number of cells we counted earlier
     table_row_count = table_column_count != 0 ? int(--j/table_column_count) : 0
 
-    delete x_cel_size
+    delete x_cell_size
     for (i=1;i<=table_row_count * table_column_count;i++) {
         j = i%table_column_count
         j = j == 0 ? table_column_count : j
-        if (x_cel_size[j] < length(table_cels[i])) 
-        	x_cel_size[j] = length(table_cels[i])
+        if (x_cell_size[j] < length(table_cells[i])) 
+        	x_cell_size[j] = length(table_cells[i])
     }
 
 	delete table_col_valign
@@ -541,7 +544,7 @@ function parse_table(data, x_cel_size,    tmp, i, j, k, w, v,
 function dump_table() {
 	in_table = 0
 
-	parse_block_atrributes()
+	parse_block_attributes()
 	block_attribute_list = ""
 
 	if ("title" in attributes) {
@@ -556,7 +559,7 @@ function dump_table() {
 
 	sub(/ *$/,"",table_items)
 	if (table_items != "") {
-		parse_table(table_items, table_cel_width)
+		parse_table(table_items, table_cell_width)
 		render_table(table_items)
 		printf("\n")
 	}
@@ -569,9 +572,9 @@ function dump_table() {
 
 
 function dump_paragraph() {
-	if (paraghraph_text != "")
-		printf("%s", format_inline(paraghraph_text))
-	paraghraph_text = ""
+	if (paragraph_text != "")
+		printf("%s", format_inline(paragraph_text))
+	paragraph_text = ""
 	in_paragraph = 0
 }
 
@@ -668,7 +671,7 @@ BEGIN { # mostly variable assignments
 
 	style_li = "\033[1;32m"
 
-	style_adomin = "\033[1;30;43m"	# yellow
+	style_admonition = "\033[1;30;43m"	# yellow
 
 	style["literal"] = style_literal
 	style["listing"] = style_listing
@@ -678,19 +681,19 @@ BEGIN { # mostly variable assignments
 	style["sidebar"] = style_sidebar
 
 	
-	cel_spec_styles[""] = ""
-	cel_spec_styles["a"] = ""
-	cel_spec_styles["e"] = "\033[3m"
-	cel_spec_styles["h"] = "\033[1m"
-	cel_spec_styles["l"] = ""
-	cel_spec_styles["s"] = "\033[1m"
-	cel_spec_styles["v"] = ""
-	cel_spec_styles["m"] = ""
-	cel_spec_styles["d"] = ""
+	cell_spec_styles[""] = ""
+	cell_spec_styles["a"] = ""
+	cell_spec_styles["e"] = "\033[3m"
+	cell_spec_styles["h"] = "\033[1m"
+	cell_spec_styles["l"] = ""
+	cell_spec_styles["s"] = "\033[1m"
+	cell_spec_styles["v"] = ""
+	cell_spec_styles["m"] = ""
+	cell_spec_styles["d"] = ""
 
-	cel_halign["<"] = "l"
-	cel_halign["^"] = "c"
-	cel_halign[">"] = "r"
+	cell_halign["<"] = "l"
+	cell_halign["^"] = "c"
+	cell_halign[">"] = "r"
 
 	J["0000"]=" "; J["1000"]="│"; J["0100"]="│"; J["1100"]="│"
 	J["0010"]="─"; J["0001"]="─"; J["0011"]="─"
@@ -708,9 +711,9 @@ BEGIN { # mostly variable assignments
 
 # block terminated
 in_basic_block {
-	if (basic_block_temin == $0) {
+	if (basic_block_term == $0) {
 		if (basic_block_type == "comment") { }
-		else delimeted_bock_dump(block_lines, block_index, 
+		else delimited_block_dump(block_lines, block_index, 
 				block_max_len, style[basic_block_type], style_none)
 		in_basic_block = 0
 		next
@@ -723,16 +726,16 @@ in_basic_block {
 }
 
 in_table {
-	if (table_termin == $0) {
+	if (table_term == $0) {
 		dump_table()
 		next
 	}
 
 	if (length(table_first_line) == 0)
 		table_first_line = $0
-	else if (!table_read_seccond_line) {
-		table_has_empty_seccond_line = length($0) == 0
-		table_read_seccond_line = 1
+	else if (!table_read_second_line) {
+		table_has_empty_second_line = length($0) == 0
+		table_read_second_line = 1
 	}
 
 	table_items = table_items " " $0
@@ -743,14 +746,14 @@ in_table {
 /^\|={3,}[[:space:]]*$/ {
 	in_table = 1
 	table_first_line=""
-	table_termin = $1
+	table_term = $1
 	table_items = ""
-	table_has_empty_seccond_line = 0
-	table_read_seccond_line = 0
+	table_has_empty_second_line = 0
+	table_read_second_line = 0
 
 	if (in_list)
 		terminate_list()
-	terminate_adomin()
+	terminate_admonition()
 	dump_paragraph()
 	next
 }
@@ -768,7 +771,7 @@ in_table {
 (/^_{4,}[[:space:]]*$/ 	&& basic_block_type = "quote")   ||
 (/^--[[:space:]]*$/ && basic_block_type = "open"){
 	in_basic_block = 1;
-	basic_block_temin = $1
+	basic_block_term = $1
 	block_max_len=1
 	block_index=0
 
@@ -776,14 +779,14 @@ in_table {
 		terminate_list()
 		printf "\n"
 	}
-	terminate_adomin()
+	terminate_admonition()
 	dump_paragraph()
 	next
 }
 
 # this is comment
 /^\/\/[^\/]/ || /^\/\/$/ { 
-	if (list_terminable) terminate_list()
+	if (list_termable) terminate_list()
 	next 
 }
 # we just pretend we did'nt see it
@@ -791,8 +794,8 @@ in_table {
 
 # block attribute
 /^\[([[:alnum:]_.#%{,"'].*)?\]$/ {
-	if (list_terminable) terminate_list()
-	terminate_adomin()
+	if (list_termable) terminate_list()
+	terminate_admonition()
 	sub(/^\[/, "")
 	sub(/\]$/, "")
 
@@ -803,8 +806,8 @@ in_table {
 		if (tmp ~ /[[:space:]]/) tmp = ""
 		
 		block_attribute_list = block_attribute_list "options=\""
-		for (i=2;i<=split(tmp, tmp_spilited, "%");i++) {
-			block_attribute_list = block_attribute_list tmp_spilited[i] ","
+		for (i=2;i<=split(tmp, tmp_parts, "%");i++) {
+			block_attribute_list = block_attribute_list tmp_parts[i] ","
 		}
 		block_attribute_list = block_attribute_list "\","
 		sub(/^%[^,]*,/, "")
@@ -831,7 +834,7 @@ function print_ordered_list(indent, item){
 function terminate_list() {
 	printf("\n")
 	in_list = 0
-	list_terminable = 0
+	list_termable = 0
 	list_last_indent_level = 0
 	added_indent = 0
 	list_indent_stack_size = 0
@@ -843,23 +846,23 @@ function terminate_list() {
 # could be part of the next condition below, but i think this is cleaner.
 in_list {
 	if (!(/^\** / || /^\- / || /^\.* / || /^[ ]*$/ || /^.+::+($|[ ])/) && 
-			list_terminable) {
+			list_termable) {
 		terminate_list()
 		printf("\n")
 	}
 }
 
 ((/^[ ]*\*+ / || /[ ]*^\- / || /[ ]*^\.+ / || /^.+::+($|[ ])/) && 
-		!in_paragraph && !in_adomin) || in_list {
+		!in_paragraph && !in_admonition) || in_list {
 	$0 = trim($0)
 
 	if ($0 == "") {
-		list_terminable = 1
+		list_termable = 1
 		next
 	} else {
 
 		# handle the title
-		parse_block_atrributes()
+		parse_block_attributes()
 		block_attribute_list = ""
 		if ("title" in attributes) 
 			printf("%s.%s\n", style_ti, attributes["title"] style_none)
@@ -867,7 +870,7 @@ in_list {
 		delete opts_attributes
 
 		in_list = 1
-		list_terminable = 0
+		list_termable = 0
 		
 		# normal lists 
 		if (match($0, /^(\*+|\.+|[-]) /)) {
@@ -916,16 +919,16 @@ in_list {
 	}
 }
 
-function terminate_adomin() {
-	if (in_adomin) {
-		in_adomin = 0
+function terminate_admonition() {
+	if (in_admonition) {
+		in_admonition = 0
 		printf "\n"
 	}
 }
 
-in_adomin {
+in_admonition {
 	if ($0 ~ /^[[:space:]]*$/) {
-		in_adomin = 0
+		in_admonition = 0
 		printf "\n"
 	} else 
 		printf("%s ", trim($0))
@@ -933,10 +936,10 @@ in_adomin {
 }
 
 (/^(NOTE|TIP|IMPORTANT|WARNING|CAUTION): ./) && !in_paragraph {
-	in_adomin = 1
+	in_admonition = 1
 	printf "\n"
 
-	parse_block_atrributes()
+	parse_block_attributes()
 	block_attribute_list = ""
 	if ("title" in attributes) 
 		printf("%s.%s\n", style_ti, attributes["title"] style_none)
@@ -946,7 +949,7 @@ in_adomin {
 
 	match($0, /^[^:]*:/)
 	
-	printf("%s%s %s\n", style_adomin, substr($0, 1, RLENGTH), style_none)
+	printf("%s%s %s\n", style_admonition, substr($0, 1, RLENGTH), style_none)
 	sub(/^[^:]*:[[:space:]]*/, "")
 	printf("   %s ", trim($0))
 	next
@@ -1013,7 +1016,7 @@ in_adomin {
 		dump_paragraph()
 		next
 	}
-	paraghraph_text = paraghraph_text $0 "\n"
+	paragraph_text = paragraph_text $0 "\n"
 	in_paragraph = 1
 	next
 }
@@ -1024,11 +1027,11 @@ END {
 	# to make sure unterminated blocks still get printed
 	if (in_basic_block)
 		if (basic_block_type == "comment") { }
-		else delimeted_bock_dump(block_lines, block_index, 
+		else delimited_block_dump(block_lines, block_index, 
 			block_max_len, style[basic_block_type], style_none)
 	if (in_table)
 		dump_table()
-	if (paraghraph_text != "") 
+	if (paragraph_text != "") 
 		dump_paragraph()
 
 	printf(style_none "\n") # to make sure the style wont bleed out
