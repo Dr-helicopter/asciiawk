@@ -222,15 +222,15 @@ Another paragraph follows.
 
   [1;36m14. Description lists: titled blocks[0m
 
-[1;33m.Description list title[0m
 
+[1;33m.Description list title[0m
 [1;32mCPU:[0m 
  Processor. 
 [1;32mRAM:[0m 
  Memory. 
 
-[1;33m.Another description list title[0m
 
+[1;33m.Another description list title[0m
 [1;32mSSD:[0m 
  Storage. 
 [1;32mHDD:[0m 

@@ -865,7 +865,7 @@ in_list {
 		parse_block_attributes()
 		block_attribute_list = ""
 		if ("title" in attributes) 
-			printf("%s.%s\n", style_ti, attributes["title"] style_none)
+			printf("\n%s.%s", style_ti, attributes["title"] style_none)
 		delete attributes
 		delete opts_attributes
 
