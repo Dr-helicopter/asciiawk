@@ -887,11 +887,12 @@ in_list {
 				indent = list_indent_stack_size++
 			 	list_indent_stack[list_item_marker] = indent
 			}
+
 			if (list_item_marker ~ /^\./) 
-				print_ordered_list(indent, list_item_text)
+				print_ordered_list(indent, format_inline(list_item_text))
 			else 
 				printf("\n%*s%s*%s %s ",  indent, "", 
-				   style_li, style_none, list_item_text)
+				   style_li, style_none, format_inline(list_item_text))
 
 
 		# descrion list
@@ -916,7 +917,7 @@ in_list {
 			   style_li, list_item_term, style_none)
 			printf("\n%*s%s ",  indent+1, "", list_item_description)
 
-		} else printf("%s ", $0)
+		} else printf("%s ", format_inline($0))
 		next
 	}
 }

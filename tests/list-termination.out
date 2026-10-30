@@ -301,9 +301,9 @@ This paragraph follows the continuation operator.
 [1;32m1[0m ASTERISK-TEXT A This text contains * an asterisk. 
 [1;32m2[0m ASTERISK-TEXT B 
 
-[1;32m1[0m _italic item_ 
-[1;32m2[0m *bold item* 
-[1;32m3[0m `monospace item` 
+[1;32m1[0m [3mitalic item[0m 
+[1;32m2[0m [1mbold item[0m 
+[1;32m3[0m [48;5;0mmonospace item[0m 
 [1;32m4[0m https://example.com[linked item] 
 :termination-test: value
 
