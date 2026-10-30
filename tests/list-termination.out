@@ -1,8 +1,10 @@
 [1;35mList Termination Torture Test[0m
 
 :toc:
+
 This opening paragraph establishes the initial document context.
 The actual tests begin below.
+
 
 [1;32m1[0m BASELINE A 
 [1;32m2[0m BASELINE B 
@@ -42,6 +44,7 @@ The actual tests begin below.
 [1;32m1[0m TEXT-TERMINATION A 
 
 ordinary paragraph
+
 
 [1;32m1[0m TEXT-TERMINATION B 
 
@@ -193,6 +196,7 @@ ordinary paragraph
 [1;32m1[0m SOURCE-ATTRIBUTE B 
 
 [1;32m1[0m TABLE A 
+
 ╒══════╤══════╕
 │Cell A[0m│Cell B[0m│
 ╞══════╪══════╡
@@ -203,6 +207,7 @@ ordinary paragraph
 [1;32m1[0m TABLE B 
 
 [1;32m1[0m TABLE-ATTRIBUTE A 
+
 ┌─┬─┐
 │A[0m│B[0m│
 └─┴─┘
@@ -241,6 +246,7 @@ ordinary paragraph
 
 This paragraph follows the continuation operator.
 . CONTINUATION-BLANKS B
+
 
 [1;32m1[0m CONTINUATION-BLOCK A + 
 
@@ -300,6 +306,7 @@ This paragraph follows the continuation operator.
 [1;32m3[0m `monospace item` 
 [1;32m4[0m https://example.com[linked item] 
 :termination-test: value
+
 
 [1;32m1[0m ATTRIBUTE-REFERENCE A 
 [1;32m2[0m Attribute value: {termination-test} 

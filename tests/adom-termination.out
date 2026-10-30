@@ -6,12 +6,14 @@
 NOTE:
 line break
 
+
 [1;30;43mNOTE: [0m
    line break extra 
 
 [1;30;43mNOTE: [0m
    line break 
 extra with space
+
 
 [1;30;43mNOTE: [0m
    block 
@@ -21,6 +23,7 @@ extra with space
 
 dd
 
+
 [1;30;43mNOTE: [0m
    table 
 ┌──────┐
@@ -28,6 +31,7 @@ dd
 └──────┘
 
 asdasd
+
 
 [1;30;43mNOTE: [0m
    list * a * b 
@@ -38,6 +42,7 @@ asdasd
 [1;30;43mNOTE: [0m
    attrib 
 asd
+
 
 [1;30;43mNOTE: [0m
    comment \\comment 

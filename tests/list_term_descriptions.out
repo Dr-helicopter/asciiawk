@@ -2,8 +2,10 @@
 
 This document tests description lists, checklists, callouts, nesting,
 indentation, mixed list types, continuation, and termination.
+
 The expected result is not always that every construct renders correctly.
 Invalid cases are included to test false positives and recovery behavior.
+
   [1;36m1. Description lists: basic syntax[0m
 
 
@@ -68,6 +70,7 @@ Invalid cases are included to test false positives and recovery behavior.
 
 :: Description with an empty term.
 
+
 [1;32m::[0m 
  Description with an empty term and extra delimiter. 
  [1;32mTerm:[0m 
@@ -78,8 +81,10 @@ Invalid cases are included to test false positives and recovery behavior.
      
 
 ::
+
 ::
 A normal paragraph without a delimiter.
+
   [1;36m6. Description lists: terms that resemble other syntax[0m
 
 
@@ -186,6 +191,7 @@ A normal paragraph without a delimiter.
  Second description. This is ordinary paragraph text immediately after the list. 
 
 Another paragraph follows.
+
 
 [1;32mGamma:[0m 
  A new description list after the paragraph. 
@@ -412,8 +418,10 @@ Another paragraph follows.
 
 +
 Second attached paragraph.
+
 +
 Third attached paragraph.
+
 
 [1;32mNext example:[0m 
  Another item. 
@@ -470,11 +478,13 @@ Third attached paragraph.
  Several blocks belong to this item. + First paragraph. 
 
 +
+
 [48;5;0m                 [0m
 [48;5;0m literal content [0m
 [48;5;0m                 [0m
 
 +
+
 [38;5;7m[48;5;0m                 [0m
 [38;5;7m[48;5;0m Quoted content. [0m
 [38;5;7m[48;5;0m                 [0m
@@ -498,6 +508,7 @@ Third attached paragraph.
 
 +
 This plus has no preceding list item.
+
 
 [1;32mCPU:[0m 
  Processor. 
@@ -523,6 +534,7 @@ This plus has no preceding list item.
 
 [1;32mBefore table:[0m 
  Description before table. + 
+
 ┌────┬─────────┐
 │Name[0m│Value    [0m│
 ├────┼─────────┤
@@ -619,6 +631,7 @@ This is not a checklist:
 [ ] Plain unchecked-looking text.
 [x] Plain checked-looking text.
 The phrase [x] inside a paragraph should not start a list.
+
   [1;36m42. Checklists: continuation paragraphs[0m
 
 
@@ -648,6 +661,7 @@ The phrase [x] inside a paragraph should not start a list.
 <1> First callout.
 <2> Second callout.
 <3> Third callout.
+
   [1;36m46. Callouts: numeric edge cases[0m
 
 <0> Zero.
@@ -657,6 +671,7 @@ The phrase [x] inside a paragraph should not start a list.
 <10> Ten.
 <99> Ninety-nine.
 <100> One hundred.
+
   [1;36m47. Callouts: malformed markers[0m
 
 <> Empty marker.
@@ -669,6 +684,7 @@ The phrase [x] inside a paragraph should not start a list.
 <<1>> Double angle brackets.
 <1 First callout without closing bracket.
 Second callout without opening bracket 2>.
+
   [1;36m48. Callouts: source-code integration[0m
 
 [48;5;0m                                   [0m
@@ -682,6 +698,7 @@ Second callout without opening bracket 2>.
 <1> Declare the first integer.
 <2> Declare the second integer.
 <3> Return their sum.
+
   [1;36m49. Callouts: other source languages[0m
 
 [48;5;0m                     [0m
@@ -693,6 +710,7 @@ Second callout without opening bracket 2>.
 <1> Assign a name.
 <2> Assign an age.
 <3> Print the name.
+
   [1;36m50. Callouts: missing or reordered numbers[0m
 
 <1> First callout.
@@ -700,6 +718,7 @@ Second callout without opening bracket 2>.
 <2> Second callout appears late.
 <1> Duplicate number one.
 <4> Number four.
+
   [1;36m51. Callouts: adjacency to other list types[0m
 
 
@@ -708,6 +727,7 @@ Second callout without opening bracket 2>.
 
 <1> Callout item one.
 <2> Callout item two.
+
 
 [1;32m1[0m Ordinary ordered item. 
 [1;32m2[0m Another ordered item. 
@@ -720,6 +740,7 @@ Second callout without opening bracket 2>.
 <2> Callout with [3mitalic text[0m.
 <3> Callout with [48;5;0minline code[0m.
 <4> Callout with https://example.invalid[link].
+
   [1;36m53. Mixed lists: type switches at one level[0m
 
 
@@ -922,15 +943,18 @@ Second callout without opening bracket 2>.
 
 This paragraph precedes an unordered list.
 
+
 [1;32m*[0m First item. 
 [1;32m*[0m Second item. 
 
 This paragraph precedes an ordered list.
 
+
 [1;32m1[0m First ordered item. 
 [1;32m2[0m Second ordered item. 
 
 This paragraph precedes a description list.
+
 
 [1;32mCPU:[0m 
  Processor. 
@@ -966,6 +990,7 @@ This paragraph precedes a description list.
 [1;32m*[0m Item B 
 
 A paragraph that may terminate the list.
+
 
 [1;32m*[0m Item C 
 

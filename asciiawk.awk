@@ -573,7 +573,7 @@ function dump_table() {
 
 function dump_paragraph() {
 	if (paragraph_text != "")
-		printf("%s", format_inline(paragraph_text))
+		printf("%s\n", format_inline(paragraph_text))
 	paragraph_text = ""
 	in_paragraph = 0
 }
@@ -751,8 +751,10 @@ in_table {
 	table_has_empty_second_line = 0
 	table_read_second_line = 0
 
-	if (in_list)
+	if (in_list) {
 		terminate_list()
+		printf "\n"
+	}
 	terminate_admonition()
 	dump_paragraph()
 	next
